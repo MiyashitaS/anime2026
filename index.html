@@ -142,7 +142,7 @@ function render(){
     const note=m.s.length&&m.n?`<div class="none">※${esc(m.n)}</div>`:"";
     h+=`<article class="card" data-txt="${esc((m.t+" "+m.s.map(s=>s[1]+" "+s[2]).join(" ")+" "+(m.v||[]).map(c=>c[0]+" "+c[1]).join(" ")).toLowerCase())}">${art}<div style="min-width:0">
       <div class="hd">${m.f?'<span class="film">映画</span>':''}<span class="cour">${esc(m.c||m.se||name)}</span><h2>${esc(m.t.replace(/^【映画】/,""))}</h2><a class="off" href="${m.o&&/^https?:\/\//.test(m.o)?esc(m.o):"https://www.google.com/search?q="+encodeURIComponent(m.t.replace(/^【映画】/,"")+" 公式サイト")}" target="_blank" rel="noopener">公式サイト ↗</a></div>
-      <div class="date">${esc(m.d)}</div>${m.v&&m.v.length?`<div class="cast">${m.v.map(c=>`<span>${esc(c[0])}<small>CV</small>${esc(c[1])}</span>`).join("")}</div>`:""}${songs}${note}</div></article>`});
+      <div class="date">${esc(m.d)}</div>${m.v&&m.v.length?`<div class="cast">${m.v.map((c,i)=>`<span>${esc(c[0])}（CV：${esc(c[1])}）${i<m.v.length-1?"、":""}</span>`).join(" ")}</div>`:""}${songs}${note}</div></article>`});
   $("main").innerHTML=h; filter(); count(); if(!qv)window.scrollTo(0,0);
 }
 function count(){$("cnt").textContent=Object.values(picks).filter(v=>!v.off).length}
