@@ -61,7 +61,8 @@ h2{font-size:17px;margin:0;text-wrap:balance;line-height:1.4}
 .act{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .pbtn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:9px 18px;cursor:pointer;background:var(--chip);color:var(--fg)}
 .pbtn.main{background:var(--pick);color:var(--pickfg)}
-.pk{list-style:none;padding:0;margin:0 0 12px}.pk li{padding:5px 0;border-bottom:1px solid var(--line)}.pk label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.pk input{width:20px;height:20px;flex-shrink:0;accent-color:var(--pick);margin-top:2px}.pk li.off{color:var(--sub)}.pk li.off label{text-decoration:line-through}
+.pk{list-style:none;padding:0;margin:0 0 12px}.pk li{padding:5px 0;border-bottom:1px solid var(--line)}.pk label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.pk input{width:20px;height:20px;flex-shrink:0;accent-color:var(--pick);margin-top:2px}.pk li.cast{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin:4px 0 8px}.cast span{white-space:nowrap}.cast small{font-size:10px;margin:0 3px 0 4px;padding:0 3px;border:1px solid var(--line);border-radius:3px}
+.off{color:var(--sub)}.pk li.off label{text-decoration:line-through}
 .x{font:inherit;font-size:12px;border:0;background:none;color:var(--pick);cursor:pointer;padding:0 4px}
 .tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:12px;color:var(--sub)}
@@ -95,7 +96,7 @@ h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
   <button class="btn" id="bug" type="button">⚠ 不具合報告</button>
   <button class="btn" id="hist" type="button">📋 対応一覧</button>
   <button class="btn" id="recs" type="button">🎵 推薦曲</button>
-  <input id="q" type="search" placeholder="作品名・曲名・アーティストで絞り込み">
+  <input id="q" type="search" placeholder="作品名・曲名・アーティスト・声優で絞り込み">
 </div></div>
 <main id="main"><p class="lead">読み込み中…</p></main>
 <div id="ov" hidden><div id="pn" role="dialog" aria-modal="true"></div></div>
@@ -139,9 +140,9 @@ function render(){
       <a class="yt" href="${esc(s[3])}" target="_blank" rel="noopener">▶ YouTube</a></div>`}).join("")
       ||`<div class="none">${m.n?esc(m.n):"OP/ED情報なし"}</div>`;
     const note=m.s.length&&m.n?`<div class="none">※${esc(m.n)}</div>`:"";
-    h+=`<article class="card" data-txt="${esc((m.t+" "+m.s.map(s=>s[1]+" "+s[2]).join(" ")).toLowerCase())}">${art}<div style="min-width:0">
-      <div class="hd">${m.f?'<span class="film">映画</span>':''}<span class="cour">${esc(m.c||m.se||name)}</span><h2>${esc(m.t.replace(/^【映画】/,""))}</h2><a class="off" href="https://www.google.com/search?q=${encodeURIComponent(m.t.replace(/^【映画】/,"")+" 公式サイト")}" target="_blank" rel="noopener">公式サイト ↗</a></div>
-      <div class="date">${esc(m.d)}</div>${songs}${note}</div></article>`});
+    h+=`<article class="card" data-txt="${esc((m.t+" "+m.s.map(s=>s[1]+" "+s[2]).join(" ")+" "+(m.v||[]).map(c=>c[0]+" "+c[1]).join(" ")).toLowerCase())}">${art}<div style="min-width:0">
+      <div class="hd">${m.f?'<span class="film">映画</span>':''}<span class="cour">${esc(m.c||m.se||name)}</span><h2>${esc(m.t.replace(/^【映画】/,""))}</h2><a class="off" href="${m.o&&/^https?:\/\//.test(m.o)?esc(m.o):"https://www.google.com/search?q="+encodeURIComponent(m.t.replace(/^【映画】/,"")+" 公式サイト")}" target="_blank" rel="noopener">公式サイト ↗</a></div>
+      <div class="date">${esc(m.d)}</div>${m.v&&m.v.length?`<div class="cast">${m.v.map(c=>`<span>${esc(c[0])}<small>CV</small>${esc(c[1])}</span>`).join("")}</div>`:""}${songs}${note}</div></article>`});
   $("main").innerHTML=h; filter(); count(); if(!qv)window.scrollTo(0,0);
 }
 function count(){$("cnt").textContent=Object.values(picks).filter(v=>!v.off).length}
