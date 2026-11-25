@@ -249,7 +249,7 @@ function renderRecs(){
   <h2 class="sec">推薦の多い曲</h2><div id="rk"><p class="none">読み込み中…</p></div><h2 class="sec">みんなの推薦</h2><div class="hist" id="rp"></div>`;
   loadRecs().then(d=>{
     if(d.updated)$("upd").textContent="最終更新："+d.updated;
-    $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map((x,i)=>`<li><span class="rkn">${i+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.indexOf(x)+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
+    $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map(x=>`<li><span class="rkn">${g.filter(y=>y.n>x.n).length+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.filter(y=>y.n>x.n).length+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
     $("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span></div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
   }).catch(()=>{$("rk").innerHTML='<p class="none">まだ推薦はありません。</p>'});
   window.scrollTo(0,0);
