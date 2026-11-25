@@ -221,7 +221,15 @@ function parseCSV(t){const R=[];let row=[],f="",q=false;for(let i=0;i<t.length;i
 const tsk=s=>(String(s).match(/\d+/g)||[]).map(Number);
 const later=(a,b)=>{for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false};
 function seMap(){const M={};[["winter2026","冬"],["spring2026","春"],["summer2026","夏"],["autumn2026","秋"]].forEach(([k,se])=>(DATA&&DATA[k]||[]).forEach(e=>e.s.forEach(s=>{const n=nz(String(s[1]).replace(/【[^】]*】/g,""));if(n&&!(n in M))M[n]=se})));return M}
-function loadRecs(){return fetch(RESP_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
+const RECS_SHEET="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent("推薦一覧");
+function loadRecs(){return fetch(RECS_SHEET+"&_="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{
+  const R=parseCSV(t);if(!R.length||R[0][0]!=="季節")throw 0;const ranking=[],by=new Map();let upd="";
+  R.slice(1).forEach(r=>{if(/^最終更新/.test(r[0]||"")){upd=r[0].replace(/^最終更新：/,"");return}if(!r[1])return;
+    ranking.push({s:r[1],n:+r[5]||0,se:r[0]||"その他"});
+    String(r[6]||"").split(/\n|、(?=\S)/).map(x=>x.trim()).filter(Boolean).forEach(nm=>{if(!by.has(nm))by.set(nm,[]);by.get(nm).push(r[1])})});
+  ranking.sort((a,b)=>b.n-a.n);
+  return {updated:(upd||"-")+"（スプレッドシートから直接読み込み）",ranking,posts:[...by].map(([name,songs])=>({date:"",name,songs}))}}).catch(()=>loadRecsCSV())}
+function loadRecsCSV(){return fetch(RESP_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
   const rows=parseCSV(t).slice(1);let posts=[];
   rows.forEach(r=>{if(r.length<2||!later(tsk(r[0]),RECS_CUTOFF))return;let L=r[1].replace(/\r/g,"").split("\n").map(x=>x.trim());let name="匿名";
     if(L[0]&&L[0].startsWith("名前：")){name=L[0].slice(3).trim()||"匿名";L=L.slice(1)}
