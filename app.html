@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<title>2026アニメ曲一覧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: sticky season bar on top, one column of title cards (art left, songs right), overlay sheet for picks */
+:root{
+  --bg:#f7f8fb; --card:#ffffff; --fg:#1d2330; --sub:#6b7386; --line:#e2e5ee; --chip:#eef0f6;
+  --bar:#1d2330; --barfg:#f7f8fb; --pick:#e0245e; --pickfg:#ffffff;
+  --s-winter:#3b6fd8; --s-spring:#d9488b; --s-summer:#0f9b8e; --s-autumn:#c9661c;
+  --acc:var(--s-winter);
+  --display:"Dela Gothic One","Zen Kaku Gothic New","Hiragino Sans",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151c; --card:#1a1f29; --fg:#e7eaf1; --sub:#98a1b4; --line:#2a3140; --chip:#242b38;
+  --bar:#0b0e14; --barfg:#e7eaf1; --pick:#ff4f86; --pickfg:#ffffff;
+  --s-winter:#7aa2ff; --s-spring:#ff7ab3; --s-summer:#3fd1c1; --s-autumn:#f39a4f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151c; --card:#1a1f29; --fg:#e7eaf1; --sub:#98a1b4; --line:#2a3140; --chip:#242b38;
+  --bar:#0b0e14; --barfg:#e7eaf1; --pick:#ff4f86; --pickfg:#ffffff;
+  --s-winter:#7aa2ff; --s-spring:#ff7ab3; --s-summer:#3fd1c1; --s-autumn:#f39a4f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6}
+body.winter{--acc:var(--s-winter)} body.spring{--acc:var(--s-spring)} body.summer{--acc:var(--s-summer)} body.autumn{--acc:var(--s-autumn)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bar)}
+#bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bar);color:var(--barfg);border-bottom:3px solid var(--acc)}
+#bar .in{max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.btn{font:inherit;font-size:14px;font-weight:700;border:0;border-radius:999px;padding:7px 14px;cursor:pointer;background:rgba(255,255,255,.12);color:var(--barfg);text-decoration:none;white-space:nowrap}
+.btn:focus-visible,.song input:focus-visible,#q:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.btn[disabled]{opacity:.3;cursor:default}
+#season{font-family:var(--display);font-size:20px;letter-spacing:.04em;margin:0 4px;color:var(--barfg)}
+#season span{color:var(--acc)}
+#chk{background:var(--pick);color:var(--pickfg)}
+#q{flex:1 1 160px;min-width:0;font:inherit;font-size:14px;border:0;border-radius:999px;padding:7px 14px;background:rgba(255,255,255,.92);color:#1d2330}
+main{max-width:1080px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.lead{color:var(--sub);font-size:13px;margin:0 0 12px}
+.card{display:grid;grid-template-columns:140px minmax(0,1fr);gap:16px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.art{width:140px;aspect-ratio:3/4;max-width:100%;object-fit:cover;border-radius:6px;background:var(--chip)}
+.noart{width:140px;aspect-ratio:3/4;max-width:100%;border-radius:6px;background:var(--chip);color:var(--sub);display:grid;place-items:center;font-size:12px}
+.hd{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 8px}
+.cour{font-size:12px;font-weight:700;color:var(--acc);border:1.5px solid var(--acc);border-radius:4px;padding:0 6px;letter-spacing:.08em}
+.film{font-size:12px;font-weight:700;background:var(--fg);color:var(--bg);border-radius:4px;padding:0 6px}
+h2{font-size:17px;margin:0;text-wrap:balance;line-height:1.4}
+.date{color:var(--sub);font-size:12px;margin:2px 0 8px}
+.song{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:start;padding:6px 0;border-top:1px dashed var(--line)}
+.song input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--pick);cursor:pointer}
+.song label{cursor:pointer;min-width:0}
+.lab{display:inline-block;font-size:11px;font-weight:700;background:var(--chip);color:var(--sub);border-radius:4px;padding:0 6px;margin-right:6px;letter-spacing:.04em}
+.st{font-weight:700}.ar{color:var(--sub);font-size:13px}
+.song.on{background:color-mix(in srgb,var(--pick) 8%,transparent)}
+.yt{font-size:12px;font-weight:700;color:var(--acc);text-decoration:none;white-space:nowrap;padding-top:2px}
+.none{color:var(--sub);font-size:13px}
+#ov{position:fixed;inset:0;background:rgba(10,12,18,.6);z-index:20;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#pn{background:var(--card);color:var(--fg);max-width:820px;margin:24px auto;max-height:calc(100% - 48px);overflow:auto;border-radius:12px;padding:20px}
+#pn h3{font-family:var(--display);font-size:20px;margin:0 0 12px;font-weight:400}
+#pn ol{padding-left:1.6em;margin:0 0 16px}#pn li{margin:6px 0}
+.act{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pbtn{font:inherit;font-weight:700;border:0;border-radius:999px;padding:9px 18px;cursor:pointer;background:var(--chip);color:var(--fg)}
+.pbtn.main{background:var(--pick);color:var(--pickfg)}
+.pk{list-style:none;padding:0;margin:0 0 12px}.pk li{padding:5px 0;border-bottom:1px solid var(--line)}.pk label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}.pk input{width:20px;height:20px;flex-shrink:0;accent-color:var(--pick);margin-top:2px}.pk li.cast{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--sub);margin:4px 0 8px}.cast span{white-space:nowrap}.cast small{font-size:10px;margin:0 3px 0 4px;padding:0 3px;border:1px solid var(--line);border-radius:3px}
+.off{color:var(--sub)}.pk li.off label{text-decoration:line-through}
+.x{font:inherit;font-size:12px;border:0;background:none;color:var(--pick);cursor:pointer;padding:0 4px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--sub)}
+textarea{width:100%;min-height:140px;font:inherit;font-size:13px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px}
+.msg{color:var(--acc);font-weight:700;font-size:13px}
+a.pbtn{display:inline-block;text-decoration:none}
+#bug{background:rgba(255,255,255,.12)}
+.st-list{list-style:none;padding:0;margin:8px 0 0}.st-list li{border-top:1px solid var(--line);padding:8px 0;font-size:13px}.st-q{color:var(--sub)}.st-a{margin-top:4px;font-weight:700}
+.hint{font-size:12px;color:var(--sub);margin:6px 0}
+.nml{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin:8px 0}.nm{flex:1;min-width:0;max-width:260px;font:inherit;font-weight:400;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.hist{display:grid;gap:12px}.hitem{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.hhd{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;margin-bottom:6px}.hno{font-weight:700}.hst{font-size:12px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--chip)}
+.rk{list-style:none;padding:0;margin:0;display:grid;gap:6px}.rk li{display:flex;gap:10px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px}.rkn{font-weight:700;color:var(--acc);min-width:2.2em;font-variant-numeric:tabular-nums}.rkc{margin-left:auto;font-size:12px;color:var(--sub);white-space:nowrap}.rkt{min-width:0;overflow-wrap:anywhere}
+h2.sec{font-family:var(--display);font-weight:400;font-size:18px;margin:20px 0 10px}
+.hst.done{color:var(--s-summer)}.hst.doing{color:var(--s-autumn)}.hst.cancel{color:var(--sub);text-decoration:line-through}.hlab{font-size:12px;color:var(--sub);margin-top:6px}
+.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
+.off{font-size:12px;font-weight:700;color:var(--sub);text-decoration:none;margin-left:auto;white-space:nowrap}.off:hover{color:var(--pick)}
+h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
+.tbw{overflow-x:auto}.tb{border-collapse:collapse;font-size:13px;width:100%}.tb th,.tb td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}.tb td.t{white-space:normal;min-width:10em}.tb .n{text-align:right;font-variant-numeric:tabular-nums}
+.hitem p{margin:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}.hcan{font-size:13px;font-weight:700;color:var(--pick);margin-top:8px;display:inline-block}
+@media (max-width:560px){.card{grid-template-columns:88px minmax(0,1fr);gap:12px}.art,.noart{width:88px}#season{font-size:17px}}
+@media (prefers-reduced-motion:no-preference){.song{transition:background .15s}}
+#gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}#gate form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;text-align:center;max-width:340px;width:100%}#gate h1{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 8px}#gate p{color:var(--sub);font-size:13px;margin:0 0 14px}#gate input{font:inherit;font-size:22px;letter-spacing:.3em;text-align:center;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;background:var(--bg);color:var(--fg)}#gate .gm{color:var(--pick);margin:12px 0 0;min-height:1em}
+</style>
+
+<div id="bar"><div class="in">
+  <button class="btn" id="prev" type="button">◀ 前</button>
+  <div id="season">2026 <span>冬</span></div>
+  <button class="btn" id="next" type="button">次 ▶</button>
+  <button class="btn" id="chk" type="button">✓ 確認 <span id="cnt">0</span>曲</button>
+  <button class="btn" id="bug" type="button">⚠ 不具合報告</button>
+  <button class="btn" id="hist" type="button">📋 対応一覧</button>
+  <button class="btn" id="recs" type="button">🎵 推薦曲</button>
+  <input id="q" type="search" placeholder="作品名・曲名・アーティスト・声優で絞り込み">
+</div></div>
+<main id="main"><p class="lead">読み込み中…</p></main>
+<div id="ov" hidden><div id="pn" role="dialog" aria-modal="true"></div></div>
+
+<script>
+let PW="";const PWK="anime2026_pw";
+async function dkey(pw,salt){const b=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveBits"]);return new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt,iterations:200000},b,256))}
+async function dec(buf,pw){const u=new Uint8Array(buf),salt=u.slice(0,16),mac=u.slice(16,48),ct=u.slice(48);const k=await dkey(pw,salt);
+ const hk=await crypto.subtle.importKey("raw",k,{name:"HMAC",hash:"SHA-256"},false,["sign"]);const m=new Uint8Array(await crypto.subtle.sign("HMAC",hk,ct));
+ if(m.length!==mac.length||m.some((x,i)=>x!==mac[i]))throw new Error("pw");
+ const n=Math.ceil(ct.length/32);const B=(await Promise.all(Array.from({length:n},(_,i)=>{const a=new Uint8Array(36);a.set(k);new DataView(a.buffer).setUint32(32,i);return crypto.subtle.digest("SHA-256",a)}))).map(x=>new Uint8Array(x));
+ const out=new Uint8Array(ct.length);for(let i=0;i<ct.length;i++)out[i]=ct[i]^B[i>>5][i&31];return JSON.parse(new TextDecoder().decode(out))}
+const sfetch=n=>fetch(n+".bin",{cache:"no-store"}).then(r=>r.arrayBuffer()).then(b=>dec(b,PW));
+</script>
+<script>
+const SEASONS=[["winter","冬"],["spring","春"],["summer","夏"],["autumn","秋"]];
+const KEY="anime2026_picks";
+let DATA=null, cur="winter", picks={}, VIEW=[];
+try{picks=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){picks={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(picks))}catch(e){}}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id);
+const nz=x=>String(x).normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]/gu,"");
+const sid=s=>(nz(s[1])||String(s[1]))+"|"+String(s[2]).normalize("NFKC").toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean).sort().join("");
+
+function route(){const h=location.hash.slice(1);if(h==="history"){renderHistory();return}if(h==="recs"){renderRecs();return}if(h==="vote"){renderRecs();return}cur=SEASONS.some(s=>s[0]===h)?h:"winter";render()}
+function render(){
+  if(!DATA)return;
+  const i=SEASONS.findIndex(s=>s[0]===cur), name=SEASONS[i][1], qv=$("q").value.trim();
+  const rows=qv?SEASONS.flatMap(([k,n])=>DATA[k+"2026"].map(m=>Object.assign({},m,{se:n}))):DATA[cur+"2026"];VIEW=rows;
+  document.body.className=cur;
+  $("season").innerHTML=`2026 <span>${name}</span>`;
+  $("prev").disabled=i===0; $("next").disabled=i===3;
+  $("prev").textContent=i>0?`◀ ${SEASONS[i-1][1]}`:"◀ 前"; $("next").textContent=i<3?`${SEASONS[i+1][1]} ▶`:"次 ▶";
+  let h=qv?`<p class="lead">「${esc(qv)}」を全シーズンから検索しています（<span id="hitn"></span>件）。</p>`:`<p class="lead">${name}アニメ ${rows.length}作品。気に入った曲にチェックを付けると、上の「確認」から一覧にできます。</p>`;
+  rows.forEach((m,ri)=>{
+    const art=m.i?`<img class="art" src="${m.i}" alt="${esc(m.t)}" loading="lazy">`:`<div class="noart">画像なし</div>`;
+    const songs=m.s.map((s,k)=>{const id=sid(s);const on=!!picks[id]&&!picks[id].off;
+      return `<div class="song${on?" on":""}"><input type="checkbox" id="c-${ri}-${k}" data-r="${ri}" data-k="${k}" ${on?"checked":""}>
+      <label for="c-${ri}-${k}"><span class="lab">${esc(s[0])}</span><span class="st">「${esc(s[1])}」</span> <span class="ar">${esc(s[2])}</span></label>
+      <a class="yt" href="${esc(s[3])}" target="_blank" rel="noopener">▶ YouTube</a></div>`}).join("")
+      ||`<div class="none">${m.n?esc(m.n):"OP/ED情報なし"}</div>`;
+    const note=m.s.length&&m.n?`<div class="none">※${esc(m.n)}</div>`:"";
+    h+=`<article class="card" data-txt="${esc((m.t+" "+m.s.map(s=>s[1]+" "+s[2]).join(" ")+" "+(m.v||[]).map(c=>c[0]+" "+c[1]).join(" ")).toLowerCase())}">${art}<div style="min-width:0">
+      <div class="hd">${m.f?'<span class="film">映画</span>':''}<span class="cour">${esc(m.c||m.se||name)}</span><h2>${esc(m.t.replace(/^【映画】/,""))}</h2><a class="off" href="${m.o&&/^https?:\/\//.test(m.o)?esc(m.o):"https://www.google.com/search?q="+encodeURIComponent(m.t.replace(/^【映画】/,"")+" 公式サイト")}" target="_blank" rel="noopener">公式サイト ↗</a></div>
+      <div class="date">${esc(m.d)}</div>${m.v&&m.v.length?`<div class="cast">${m.v.map((c,i)=>`<span>${esc(c[0])}（CV：${esc(c[1])}）${i<m.v.length-1?"、":""}</span>`).join(" ")}</div>`:""}${songs}${note}</div></article>`});
+  $("main").innerHTML=h; filter(); count(); if(!qv)window.scrollTo(0,0);
+}
+function count(){$("cnt").textContent=Object.values(picks).filter(v=>!v.off).length}
+function filter(){const v=$("q").value.trim().toLowerCase();let n=0;document.querySelectorAll(".card").forEach(c=>{c.hidden=!!v&&!c.dataset.txt.includes(v);if(!c.hidden)n++});if($("hitn"))$("hitn").textContent=n}
+$("main").addEventListener("change",e=>{const c=e.target;if(c.type!=="checkbox")return;
+  const m=VIEW[+c.dataset.r], s=m.s[+c.dataset.k], id=sid(s);
+  const name=SEASONS.find(x=>x[0]===cur)[1];
+  if(c.checked)picks[id]={q:(m.c||name),t:m.t,l:s[0],s:s[1],a:s[2],u:s[3]};else if(picks[id])picks[id].off=true;
+  c.closest(".song").classList.toggle("on",c.checked); save(); count()});
+let qT;$("q").addEventListener("input",()=>{clearTimeout(qT);qT=setTimeout(()=>{if(["#history","#recs","#vote"].includes(location.hash)){try{history.replaceState(null,"","#"+cur)}catch(e){}}render()},250)});
+const go=h=>{try{history.replaceState(null,"","#"+h)}catch(e){location.hash=h}route()};
+$("prev").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash))return;const i=SEASONS.findIndex(s=>s[0]===cur);if(i>0)go(SEASONS[i-1][0])};
+$("next").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash)){go("winter");return}const i=SEASONS.findIndex(s=>s[0]===cur);if(i<3)go(SEASONS[i+1][0])};
+window.addEventListener("hashchange",route);
+
+const ORD={"冬":0,"春":1,"夏":2,"秋":3};
+const active=()=>list().filter(x=>!x.off);
+const list=()=>Object.entries(picks).map(([id,v])=>({id,...v})).sort((a,b)=>((ORD[a.q[0]]??9)-(ORD[b.q[0]]??9))||a.t.localeCompare(b.t,"ja"));
+function open(){$("ov").hidden=false;document.body.style.overflow="hidden"}
+function close(){$("ov").hidden=true;document.body.style.overflow="";render()}
+function showCheck(confirmClear){
+  const L=list(), A=active();let h=`<h3>チェックした曲 ${A.length}曲</h3>`;
+  h+=L.length?`<p class="hint">チェックを外した曲も一覧に残るので、もう一度チェックすれば元に戻せます。送信されるのはチェックが付いている曲だけです。</p><ul class="pk">${L.map(x=>`<li class="${x.off?"off":""}"><label><input type="checkbox" data-tg="${esc(x.id)}" ${x.off?"":"checked"}> ${esc(x.s)}</label></li>`).join("")}</ul>`:`<p class="none">まだチェックした曲はありません。各季節のページで曲にチェックを付けてください。</p>`;
+  h+=`<div class="act"><button class="pbtn main" id="send" type="button" ${A.length?"":"disabled"}>送信して一覧にする</button>`;
+  h+=confirmClear?`<button class="pbtn" id="clr2" type="button">本当にすべて外す</button><button class="pbtn" id="back" type="button">やめる</button>`
+                 :`<button class="pbtn" id="clr" type="button" ${A.length?"":"disabled"}>すべて外す</button>${L.length>A.length?'<button class="pbtn" id="purge" type="button">外した曲を一覧から消す</button>':""}<button class="pbtn" id="cls" type="button">閉じる</button>`;
+  $("pn").innerHTML=h+"</div>";open();
+}
+function showSent(){
+  const L=active(), txt=L.map(x=>x.s).join("\n");
+  let h=`<h3>推薦する曲の一覧 ${L.length}曲</h3><ol>`+L.map(x=>`<li>${esc(x.s)}</li>`).join("")+`</ol>`;
+  h+=`<p style="margin:16px 0 6px;font-size:13px;color:var(--sub)">テキスト版（コピーして送れます）</p><textarea id="txt" readonly>${esc(txt)}</textarea>`;
+  h+=nmHtml();h+=`<div class="act"><a class="pbtn main" href="${formUrl("【推薦する曲】\n"+txt)}" data-form="${esc("【推薦する曲】\n"+txt)}" target="_blank" rel="noopener">フォームで送る</a><button class="pbtn" id="copy" type="button">テキストをコピー</button><button class="pbtn" id="back" type="button">戻る</button><button class="pbtn" id="cls" type="button">閉じる</button><span class="msg" id="msg"></span></div>`;
+  $("pn").innerHTML=h;open();
+}
+$("pn").addEventListener("change",e=>{const t=e.target;if(!t.dataset||!t.dataset.tg)return;const p=picks[t.dataset.tg];if(!p)return;p.off=!t.checked;t.closest("li").classList.toggle("off",!t.checked);save();count();const A=active();$("pn").querySelector("h3").textContent=`チェックした曲 ${A.length}曲`;$("send").disabled=!A.length});
+$("pn").addEventListener("click",e=>{const t=e.target;
+  if(t.dataset.rm){delete picks[t.dataset.rm];save();count();showCheck()}
+  else if(t.id==="send")showSent();
+  else if(t.id==="clr")showCheck(true);
+  else if(t.id==="clr2"){Object.values(picks).forEach(v=>v.off=true);save();count();showCheck()}
+  else if(t.id==="purge"){for(const k in picks)if(picks[k].off)delete picks[k];save();count();showCheck()}
+  else if(t.id==="back")showCheck();
+  else if(t.id==="cls")close();
+  else if(t.id==="copy"){const ta=$("txt");
+    navigator.clipboard.writeText(ta.value).then(()=>$("msg").textContent="コピーしました",()=>{ta.focus();ta.select();$("msg").textContent="選択しました。Ctrl+C（長押し→コピー）で写せます"})}
+});
+$("chk").onclick=()=>showCheck();
+const FORM="https://docs.google.com/forms/d/e/1FAIpQLScwqZ7wMXa7DydWLKGUSJGjvMHoaxR79GHPiMODxIxRGJedtw/viewform";
+let NAME="";try{NAME=localStorage.getItem("anime2026_name")||""}catch(e){}
+const formUrl=t=>FORM+"?usp=pp_url&entry.1023418956="+encodeURIComponent(("名前："+(NAME.trim()||"匿名")+"\n"+t).slice(0,1800));
+document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("nm")){NAME=e.target.value;try{localStorage.setItem("anime2026_name",NAME)}catch(x){}}});
+const refreshForms=()=>document.querySelectorAll("a[data-form]").forEach(a=>{let t=a.dataset.form;if(a.id==="buglink"&&$("bugtxt"))t+=$("bugtxt").value;a.href=formUrl(t)});
+document.addEventListener("input",e=>{if(e.target.id==="bugtxt"||(e.target.classList&&e.target.classList.contains("nm")))refreshForms()});
+["pointerdown","touchstart","focusin"].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.closest&&e.target.closest("a[data-form]"))refreshForms()},true));
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a[data-form]");if(!a)return;let t=a.dataset.form;if(a.id==="buglink")t+=$("bugtxt").value;a.href=formUrl(t)},true);
+const nmHtml=()=>`<label class="nml">名前 <input class="nm" type="text" maxlength="40" value="${esc(NAME)}" placeholder="空欄なら匿名"></label>`;
+function showBug(){
+  const name=SEASONS.find(x=>x[0]===cur)[1];
+  let h=`<h3>不具合報告</h3><p class="hint">気づいたこと（曲の間違い・抜け、画像の誤りなど）を書いて「フォームを開いて送る」を押してください。開いたフォームで送信ボタンを押すと届きます。アカウントは不要です。</p>
+  ${nmHtml()}<textarea id="bugtxt" placeholder="例：〇〇のEDが違う、正しくは「△△」"></textarea>
+  <div class="act"><a class="pbtn main" id="buglink" href="${formUrl("【不具合報告】"+name+"のページ\n")}" target="_blank" rel="noopener">フォームを開いて送る</a><button class="pbtn" id="cls" type="button">閉じる</button></div>
+  <h3 style="margin-top:20px;font-size:17px">対応状況</h3><p class="hint">新しい返信が出ないときは、ブラウザでこのページ全体を再読み込み（F5／下に引っぱって更新）してください。</p><ul class="st-list" id="stl"><li class="st-q">読み込み中…</li></ul>`;
+  $("pn").innerHTML=h;open();
+  $("buglink").dataset.form="【不具合報告】"+name+"のページ\n";
+  sfetch("status").then(L=>{
+    $("stl").innerHTML=L.length?L.map(x=>`<li><div class="st-q">${esc(x.date)}　${esc(x.report)}</div><div class="st-a">${x.state==="対応中"?"⏳ 現在対応中":"→ "+esc(x.reply)}</div></li>`).join(""):'<li class="st-q">まだ報告はありません。</li>'})
+  .catch(()=>{$("stl").innerHTML='<li class="st-q">まだ報告はありません。</li>'});
+}
+$("bug").onclick=showBug;
+$("recs").onclick=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.style.overflow=""}try{history.replaceState(null,"","#recs")}catch(e){}renderRecs()};
+
+const RESP_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vRXFZuu4lGe7iqhkmpOWSYRMAlEjbRog90lhSlWL-8hg80dn9qrymdhnje5Ch8RdQp2kNk_U550zRB5/pub?gid=1862795633&single=true&output=csv";
+const RECS_CUTOFF=[2026,11,25,19,34,40];const RECS_EXCLUDE=[];
+function parseCSV(t){const R=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===','){row.push(f);f=""}else if(c==='\n'){row.push(f);R.push(row);row=[];f=""}else if(c!=='\r')f+=c}if(f||row.length){row.push(f);R.push(row)}return R}
+const tsk=s=>(String(s).match(/\d+/g)||[]).map(Number);
+const later=(a,b)=>{for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false};
+function seMap(){const M={};[["winter2026","冬"],["spring2026","春"],["summer2026","夏"],["autumn2026","秋"]].forEach(([k,se])=>(DATA&&DATA[k]||[]).forEach(e=>e.s.forEach(s=>{const n=nz(String(s[1]).replace(/【[^】]*】/g,""));if(n&&!(n in M))M[n]=se})));return M}
+const RECS_SHEET="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent("推薦一覧");
+function loadRecs(){return fetch(RECS_SHEET+"&_="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{
+  const R=parseCSV(t);if(!R.length||R[0][0]!=="季節")throw 0;const ranking=[],by=new Map();let upd="";
+  R.slice(1).forEach(r=>{if(/^最終更新/.test(r[0]||"")){upd=r[0].replace(/^最終更新：/,"");return}if(!r[1])return;
+    ranking.push({s:r[1],n:+r[5]||0,se:r[0]||"その他"});
+    String(r[6]||"").split(/\n|、(?=\S)/).map(x=>x.trim()).filter(Boolean).forEach(nm=>{if(!by.has(nm))by.set(nm,[]);by.get(nm).push(r[1])})});
+  ranking.sort((a,b)=>b.n-a.n);
+  return {updated:(upd||"-")+"（スプレッドシートから直接読み込み）",ranking,posts:[...by].map(([name,songs])=>({date:"",name,songs}))}}).catch(()=>loadRecsCSV())}
+function loadRecsCSV(){return fetch(RESP_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{
+  const rows=parseCSV(t).slice(1);let posts=[];
+  rows.forEach(r=>{if(r.length<2||!later(tsk(r[0]),RECS_CUTOFF))return;let L=r[1].replace(/\r/g,"").split("\n").map(x=>x.trim());let name="匿名";
+    if(L[0]&&L[0].startsWith("名前：")){name=L[0].slice(3).trim()||"匿名";L=L.slice(1)}
+    if(!["【推薦する曲】","【好きな曲】","【チェックした曲】"].includes(L[0])||RECS_EXCLUDE.includes(name))return;
+    const songs=L.slice(1).filter(Boolean);if(name!=="匿名")posts=posts.filter(p=>p.name!==name);posts.push({date:r[0],name,songs})});
+  const M=seMap(),cnt=new Map();posts.forEach(p=>[...new Set(p.songs)].forEach(s=>cnt.set(s,(cnt.get(s)||0)+1)));
+  const ranking=[...cnt].map(([s,n])=>({s,n,se:M[nz(s.replace(/【[^】]*】/g,""))]||"その他"})).sort((a,b)=>b.n-a.n);
+  const now=new Date(),p2=x=>String(x).padStart(2,"0");
+  return {updated:`${now.getFullYear()}/${p2(now.getMonth()+1)}/${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())}（開いた時点の最新）`,ranking,posts:posts.reverse()}})}
+function renderRecs(){
+  document.body.className="spring";
+  $("season").innerHTML="2026 <span>推薦曲</span>";
+  $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
+  const SH="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/edit";
+  $("main").innerHTML=`<p class="lead">みんなが「推薦する曲」として送った曲の一覧です。「✓ 確認」から送信すると、ここに追加されます（反映まで最大5分ほど。ページを開き直すと最新になります）。</p><p class="lead" id="upd"></p>
+  <div class="act"><a class="pbtn main" href="${SH}" target="_blank" rel="noopener">採点表（スプレッドシート）を開く</a></div>
+  <h2 class="sec">推薦の多い曲</h2><div id="rk"><p class="none">読み込み中…</p></div><h2 class="sec">みんなの推薦</h2><div class="hist" id="rp"></div>`;
+  loadRecs().then(d=>{
+    if(d.updated)$("upd").textContent="最終更新："+d.updated;
+    $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map(x=>`<li><span class="rkn">${g.filter(y=>y.n>x.n).length+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.filter(y=>y.n>x.n).length+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
+    $("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span></div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
+  }).catch(()=>{$("rk").innerHTML='<p class="none">まだ推薦はありません。</p>'});
+  window.scrollTo(0,0);
+}
+
+let VOTES={};try{VOTES=JSON.parse(localStorage.getItem("anime2026_votes")||"{}")||{}}catch(e){VOTES={}}
+const voteText=()=>"【採点】\n"+Object.entries(VOTES).filter(([s,v])=>v!=="").map(([s,v])=>v+"："+s).join("\n");
+function voteSync(){try{localStorage.setItem("anime2026_votes",JSON.stringify(VOTES))}catch(e){}const a=$("votelink");if(!a)return;const t=voteText(),n=Object.values(VOTES).filter(v=>v!=="").length;a.dataset.form=t;a.href=formUrl(t);$("vcnt").textContent=n+"曲採点済み"+(t.length>1700?"（多すぎるため2回に分けて送ってください）":"")}
+const _unusedVote=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.style.overflow=""}try{history.replaceState(null,"","#vote")}catch(e){}renderVote()};
+const SEO=["冬","春","夏","秋","その他"];const bySe=(L,f)=>SEO.map(se=>{const g=L.filter(x=>(x.se||"その他")===se);return g.length?`<h3 class="vse">${se}アニメ</h3>`+f(g):""}).join("");
+const f2=x=>(Math.round(x*100)/100).toFixed(2);
+function renderVote(){
+  document.body.className="summer";
+  $("season").innerHTML="2026 <span>採点</span>";
+  $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
+  $("main").innerHTML='<p class="lead">推薦された曲を0〜10点で採点するアンケートです。聴いた曲だけ点をつけてフォームで送ってください（同じ名前で送り直すと最新の内容に置き換わります）。集計は数分で下に反映されます。</p><div id="vf"></div><h2 class="sec">集計結果</h2><div id="vr"><p class="none">読み込み中…</p></div>';
+  loadRecs().then(d=>{
+    const L=d.ranking.map(x=>x.s);
+    $("vf").innerHTML=L.length?nmHtml()+bySe(d.ranking,g=>'<ol class="vt">'+g.map(x=>x.s).map(s=>{const v=VOTES[s]??"";return`<li class="${v!==""?"on":""}"><span class="rkt">${esc(s)}</span><select data-vs="${esc(s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(v)?" selected":""}>${n}</option>`).join("")}</select></li>`}).join("")+'</ol>')+'<div class="act"><a class="pbtn main" id="votelink" href="#" target="_blank" rel="noopener">フォームで送る</a><span class="msg" id="vcnt"></span></div>':'<p class="none">まだ推薦された曲がありません。</p>';
+    voteSync();
+    const V=d.vote;
+    if(!V||!V.songs.length){$("vr").innerHTML='<p class="none">まだ採点はありません。</p>';return}
+    let h=`<p class="lead">${V.raters}人が採点。「補正」は人ごとの甘辛を揃えた値（偏差値の考え方、0が平均）。</p><h2 class="sec">ランキング</h2>`+bySe(V.songs,g=>'<div class="tbw"><table class="tb"><tr><th>#</th><th>曲</th><th class="n">平均</th><th class="n">補正</th><th class="n">人数</th><th class="n">ばらつき</th></tr>'+g.map((x,i)=>`<tr><td class="n">${i+1}</td><td class="t">${esc(x.s)}</td><td class="n">${f2(x.avg)}</td><td class="n">${x.z==null?"-":f2(x.z)}</td><td class="n">${x.n}</td><td class="n">${f2(x.sd)}</td></tr>`).join("")+'</table></div>');
+    if(V.split.length)h+='<h2 class="sec">評価が割れた曲</h2><div class="hist">'+V.split.map(x=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(x.s)}</span><span class="hst">ばらつき ${f2(x.sd)}</span></div><p>${Object.entries(x.sc).map(([k,v])=>esc(k)+" "+v).join("　")}</p></article>`).join("")+'</div>';
+    if(V.people.length)h+='<h2 class="sec">採点した人のクセ</h2><div class="tbw"><table class="tb"><tr><th>名前</th><th class="n">曲数</th><th class="n">平均点</th><th class="n">みんなとの一致</th><th>一番の推し</th></tr>'+V.people.map(x=>`<tr><td>${esc(x.name)}</td><td class="n">${x.n}</td><td class="n">${f2(x.mean)}</td><td class="n">${x.r==null?"-":f2(x.r)}</td><td class="t">${x.best?esc(x.best):"-"}</td></tr>`).join("")+'</table></div>';
+    if(V.pairs.length)h+='<h2 class="sec">好みが近い組み合わせ</h2><ol class="rk">'+V.pairs.map(x=>`<li><span class="rkt">${esc(x.a)} × ${esc(x.b)}</span><span class="rkc">一致 ${f2(x.r)}（${x.n}曲）</span></li>`).join("")+'</ol>';
+    $("vr").innerHTML=h;
+  }).catch(()=>{$("vf").innerHTML='<p class="none">読み込めませんでした。再読み込みしてください。</p>';$("vr").innerHTML=""});
+  window.scrollTo(0,0);
+}
+document.addEventListener("change",e=>{const s=e.target.dataset&&e.target.dataset.vs;if(s==null)return;VOTES[s]=e.target.value;if(e.target.value==="")delete VOTES[s];e.target.closest("li").className=e.target.value!==""?"on":"";voteSync()});
+document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("nm"))setTimeout(voteSync,0)});
+
+$("hist").onclick=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.style.overflow=""}if(location.hash!=="#history"){try{history.replaceState(null,"","#history")}catch(e){}}renderHistory()};
+function renderHistory(){
+  document.body.className="winter";
+  $("season").innerHTML="2026 <span>対応一覧</span>";
+  $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
+  $("main").innerHTML='<p class="lead">これまでに届いた報告と、その対応です。間違った対応は「この対応を取り消す」から取り消しを依頼できます（フォームが開くので、送信すると元に戻します）。新しい内容が出ないときはページ全体を再読み込みしてください。</p>'+nmHtml()+'<div class="hist" id="hl" style="margin-top:12px"><p class="none">読み込み中…</p></div>';
+  sfetch("status").then(L=>{
+    $("hl").innerHTML=L.length?L.slice().reverse().map(x=>{const can=x.state==="取り消し済み", doing=x.state==="対応中";
+      return `<article class="hitem"><div class="hhd"><span class="hno">No.${esc(x.id)}</span><span class="date">${esc(x.date)}</span><span class="hst ${can?"cancel":doing?"doing":"done"}">${esc(x.state||"対応済み")}</span></div>
+      <div class="hlab">報告内容（${esc(x.name||"匿名")}）</div><p>${esc(x.report)}</p><div class="hlab">対応結果</div><p>${doing?"⏳ 現在対応中です。しばらくお待ちください。":esc(x.reply)}</p>
+      ${(can||doing)?"":`<a class="hcan" href="${formUrl("【対応取り消し依頼】No."+x.id+"\n"+x.report)}" data-form="${esc("【対応取り消し依頼】No."+x.id+"\n"+x.report)}" target="_blank" rel="noopener">この対応を取り消す</a>`}</article>`}).join(""):'<p class="none">まだ報告はありません。</p>';
+    if(typeof RESP_CSV!=="undefined"){const mx=L.reduce((a,x)=>x.ts&&later(tsk(x.ts),a)?tsk(x.ts):a,[0]);
+      fetch(RESP_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{const P=parseCSV(t).slice(1).filter(r=>r.length>1&&/【不具合報告】|【対応取り消し依頼】/.test(r[1])&&later(tsk(r[0]),mx));
+        if(!P.length)return;$("hl").insertAdjacentHTML("afterbegin",P.reverse().map(r=>{let Ls=r[1].replace(/\r/g,"").split("\n");let nm="匿名";if(Ls[0].startsWith("名前："))nm=Ls.shift().slice(3).trim()||"匿名";
+          return `<article class="hitem"><div class="hhd"><span class="hno">受付</span><span class="date">${esc(r[0])}</span><span class="hst doing">確認待ち</span></div><div class="hlab">報告内容（${esc(nm)}）</div><p>${esc(Ls.join("\n").trim())}</p><div class="hlab">対応結果</div><p>📨 受け付けました。順番に確認して対応します（同じ内容を送り直す必要はありません）。</p></article>`}).join(""))}).catch(()=>{})}
+  }).catch(()=>{$("hl").innerHTML='<p class="none">まだ報告はありません。</p>'});
+  window.scrollTo(0,0);
+}
+
+$("ov").addEventListener("click",e=>{if(e.target.id==="ov")close()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("ov").hidden)close()});
+
+function unlock(pw){PW=pw;return sfetch("data").then(d=>{try{localStorage.setItem(PWK,pw)}catch(e){}const g=$("gate");if(g)g.remove();document.body.style.overflow="";DATA=d;route()})}
+function showGate(msg){if($("gate"))return;const g=document.createElement("div");g.id="gate";g.innerHTML=`<form id="gf"><h1>2026アニメ曲一覧</h1><p>パスワード（8桁）を入力してください</p><input id="gp" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" required><button class="pbtn main" type="submit">開く</button><p id="gm" class="gm">${msg||""}</p></form>`;document.body.appendChild(g);document.body.style.overflow="hidden";
+ $("gf").onsubmit=e=>{e.preventDefault();$("gm").textContent="確認中…";unlock($("gp").value.trim()).catch(()=>{$("gm").textContent="パスワードが違います";$("gp").select()})};setTimeout(()=>$("gp").focus(),50)}
+(()=>{let s="";try{s=localStorage.getItem(PWK)||""}catch(e){}if(s)unlock(s).catch(()=>showGate());else showGate()})();
+count();
+</script>
+
+</html>
