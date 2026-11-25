@@ -83,6 +83,7 @@ h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 .hitem p{margin:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}.hcan{font-size:13px;font-weight:700;color:var(--pick);margin-top:8px;display:inline-block}
 @media (max-width:560px){.card{grid-template-columns:88px minmax(0,1fr);gap:12px}.art,.noart{width:88px}#season{font-size:17px}}
 @media (prefers-reduced-motion:no-preference){.song{transition:background .15s}}
+#gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}#gate form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;text-align:center;max-width:340px;width:100%}#gate h1{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 8px}#gate p{color:var(--sub);font-size:13px;margin:0 0 14px}#gate input{font:inherit;font-size:22px;letter-spacing:.3em;text-align:center;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;background:var(--bg);color:var(--fg)}#gate .gm{color:var(--pick);margin:12px 0 0;min-height:1em}
 </style>
 
 <div id="bar"><div class="in">
@@ -98,6 +99,16 @@ h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 <main id="main"><p class="lead">読み込み中…</p></main>
 <div id="ov" hidden><div id="pn" role="dialog" aria-modal="true"></div></div>
 
+<script>
+let PW="";const PWK="anime2026_pw";
+async function dkey(pw,salt){const b=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveBits"]);return new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt,iterations:200000},b,256))}
+async function dec(buf,pw){const u=new Uint8Array(buf),salt=u.slice(0,16),mac=u.slice(16,48),ct=u.slice(48);const k=await dkey(pw,salt);
+ const hk=await crypto.subtle.importKey("raw",k,{name:"HMAC",hash:"SHA-256"},false,["sign"]);const m=new Uint8Array(await crypto.subtle.sign("HMAC",hk,ct));
+ if(m.length!==mac.length||m.some((x,i)=>x!==mac[i]))throw new Error("pw");
+ const n=Math.ceil(ct.length/32);const B=(await Promise.all(Array.from({length:n},(_,i)=>{const a=new Uint8Array(36);a.set(k);new DataView(a.buffer).setUint32(32,i);return crypto.subtle.digest("SHA-256",a)}))).map(x=>new Uint8Array(x));
+ const out=new Uint8Array(ct.length);for(let i=0;i<ct.length;i++)out[i]=ct[i]^B[i>>5][i&31];return JSON.parse(new TextDecoder().decode(out))}
+const sfetch=n=>fetch(n+".bin",{cache:"no-store"}).then(r=>r.arrayBuffer()).then(b=>dec(b,PW));
+</script>
 <script>
 const SEASONS=[["winter","冬"],["spring","春"],["summer","夏"],["autumn","秋"]];
 const KEY="anime2026_picks";
@@ -194,7 +205,7 @@ function showBug(){
   <h3 style="margin-top:20px;font-size:17px">対応状況</h3><p class="hint">新しい返信が出ないときは、ブラウザでこのページ全体を再読み込み（F5／下に引っぱって更新）してください。</p><ul class="st-list" id="stl"><li class="st-q">読み込み中…</li></ul>`;
   $("pn").innerHTML=h;open();
   $("buglink").dataset.form="【不具合報告】"+name+"のページ\n";
-  fetch("status.json",{cache:"no-store"}).then(r=>r.json()).then(L=>{
+  sfetch("status").then(L=>{
     $("stl").innerHTML=L.length?L.map(x=>`<li><div class="st-q">${esc(x.date)}　${esc(x.report)}</div><div class="st-a">${x.state==="対応中"?"⏳ 現在対応中":"→ "+esc(x.reply)}</div></li>`).join(""):'<li class="st-q">まだ報告はありません。</li>'})
   .catch(()=>{$("stl").innerHTML='<li class="st-q">まだ報告はありません。</li>'});
 }
@@ -267,7 +278,7 @@ function renderHistory(){
   $("season").innerHTML="2026 <span>対応一覧</span>";
   $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
   $("main").innerHTML='<p class="lead">これまでに届いた報告と、その対応です。間違った対応は「この対応を取り消す」から取り消しを依頼できます（フォームが開くので、送信すると元に戻します）。新しい内容が出ないときはページ全体を再読み込みしてください。</p>'+nmHtml()+'<div class="hist" id="hl" style="margin-top:12px"><p class="none">読み込み中…</p></div>';
-  fetch("status.json",{cache:"no-store"}).then(r=>r.json()).then(L=>{
+  sfetch("status").then(L=>{
     $("hl").innerHTML=L.length?L.slice().reverse().map(x=>{const can=x.state==="取り消し済み", doing=x.state==="対応中";
       return `<article class="hitem"><div class="hhd"><span class="hno">No.${esc(x.id)}</span><span class="date">${esc(x.date)}</span><span class="hst ${can?"cancel":doing?"doing":"done"}">${esc(x.state||"対応済み")}</span></div>
       <div class="hlab">報告内容（${esc(x.name||"匿名")}）</div><p>${esc(x.report)}</p><div class="hlab">対応結果</div><p>${doing?"⏳ 現在対応中です。しばらくお待ちください。":esc(x.reply)}</p>
@@ -279,7 +290,10 @@ function renderHistory(){
 $("ov").addEventListener("click",e=>{if(e.target.id==="ov")close()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("ov").hidden)close()});
 
-fetch("data.json").then(r=>r.json()).then(d=>{DATA=d;route()}).catch(()=>{$("main").innerHTML='<p class="lead">データを読み込めませんでした。ページを再読み込みしてください。</p>'});
+function unlock(pw){PW=pw;return sfetch("data").then(d=>{try{localStorage.setItem(PWK,pw)}catch(e){}const g=$("gate");if(g)g.remove();document.body.style.overflow="";DATA=d;route()})}
+function showGate(msg){if($("gate"))return;const g=document.createElement("div");g.id="gate";g.innerHTML=`<form id="gf"><h1>2026アニメ曲一覧</h1><p>パスワード（8桁）を入力してください</p><input id="gp" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" required><button class="pbtn main" type="submit">開く</button><p id="gm" class="gm">${msg||""}</p></form>`;document.body.appendChild(g);document.body.style.overflow="hidden";
+ $("gf").onsubmit=e=>{e.preventDefault();$("gm").textContent="確認中…";unlock($("gp").value.trim()).catch(()=>{$("gm").textContent="パスワードが違います";$("gp").select()})};setTimeout(()=>$("gp").focus(),50)}
+(()=>{let s="";try{s=localStorage.getItem(PWK)||""}catch(e){}if(s)unlock(s).catch(()=>showGate());else showGate()})();
 count();
 </script>
 
