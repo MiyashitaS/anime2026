@@ -96,7 +96,6 @@ h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
   <button class="btn" id="bug" type="button">⚠ 不具合報告</button>
   <button class="btn" id="hist" type="button">📋 対応一覧</button>
   <button class="btn" id="recs" type="button">🎵 推薦曲</button>
-  <a class="btn" href="2025/" style="text-decoration:none">📅 2025</a>
   <input id="q" type="search" placeholder="作品名・曲名・アーティスト・声優で絞り込み">
   <button class="btn nmchg" id="me" type="button" title="名前を変更">👤 <span class="nmv"></span></button>
 </div></div>
@@ -115,7 +114,9 @@ const sfetch=n=>fetch(n+".bin",{cache:"no-store"}).then(r=>r.arrayBuffer()).then
 </script>
 <script>
 const SEASONS=[["winter","冬"],["spring","春"],["summer","夏"],["autumn","秋"]];
-const KEY="anime2026_picks";
+const YEAR=2026,YEARS=[2024,2025,2026],ROOT=YEAR===2026?"./":"../";
+const yearUrl=(y,s)=>(YEAR===2026?"":"../")+(y===2026?"":y+"/")+"#"+s;
+const KEY=YEAR===2026?"anime2026_picks":"anime"+YEAR+"_picks";
 let DATA=null, cur="winter", picks={}, VIEW=[];
 try{picks=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){picks={}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(picks))}catch(e){}}
@@ -128,11 +129,11 @@ function route(){const h=location.hash.slice(1);if(h==="history"){renderHistory(
 function render(){
   if(!DATA)return;
   const i=SEASONS.findIndex(s=>s[0]===cur), name=SEASONS[i][1], qv=$("q").value.trim();
-  const rows=qv?SEASONS.flatMap(([k,n])=>DATA[k+"2026"].map(m=>Object.assign({},m,{se:n}))):DATA[cur+"2026"];VIEW=rows;
+  const rows=qv?SEASONS.flatMap(([k,n])=>DATA[k+YEAR].map(m=>Object.assign({},m,{se:n}))):DATA[cur+YEAR];VIEW=rows;
   document.body.className=cur;
-  $("season").innerHTML=`2026 <span>${name}</span>`;
-  $("prev").disabled=i===0; $("next").disabled=i===3;
-  $("prev").textContent=i>0?`◀ ${SEASONS[i-1][1]}`:"◀ 前"; $("next").textContent=i<3?`${SEASONS[i+1][1]} ▶`:"次 ▶";
+  $("season").innerHTML=`${YEAR} <span>${name}</span>`;
+  $("prev").disabled=i===0&&!YEARS.includes(YEAR-1); $("next").disabled=i===3&&!YEARS.includes(YEAR+1);
+  $("prev").textContent=i>0?`◀ ${SEASONS[i-1][1]}`:(YEARS.includes(YEAR-1)?`◀ ${YEAR-1}秋`:"◀ 前"); $("next").textContent=i<3?`${SEASONS[i+1][1]} ▶`:(YEARS.includes(YEAR+1)?`${YEAR+1}冬 ▶`:"次 ▶");
   let h=qv?`<p class="lead">「${esc(qv)}」を全シーズンから検索しています（<span id="hitn"></span>件）。</p>`:`<p class="lead">${name}アニメ ${rows.length}作品。気に入った曲にチェックを付けると、上の「確認」から一覧にできます。</p>`;
   rows.forEach((m,ri)=>{
     const art=m.i?`<img class="art" src="${m.i}" alt="${esc(m.t)}" loading="lazy">`:`<div class="noart">画像なし</div>`;
@@ -156,8 +157,8 @@ $("main").addEventListener("change",e=>{const c=e.target;if(c.type!=="checkbox")
   c.closest(".song").classList.toggle("on",c.checked); save(); count()});
 let qT;$("q").addEventListener("input",()=>{clearTimeout(qT);qT=setTimeout(()=>{if(["#history","#recs","#vote"].includes(location.hash)){try{history.replaceState(null,"","#"+cur)}catch(e){}}render()},250)});
 const go=h=>{try{history.replaceState(null,"","#"+h)}catch(e){location.hash=h}route()};
-$("prev").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash))return;const i=SEASONS.findIndex(s=>s[0]===cur);if(i>0)go(SEASONS[i-1][0])};
-$("next").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash)){go("winter");return}const i=SEASONS.findIndex(s=>s[0]===cur);if(i<3)go(SEASONS[i+1][0])};
+$("prev").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash))return;const i=SEASONS.findIndex(s=>s[0]===cur);if(i>0)go(SEASONS[i-1][0]);else if(YEARS.includes(YEAR-1))location.href=yearUrl(YEAR-1,"autumn")};
+$("next").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash)){go("winter");return}const i=SEASONS.findIndex(s=>s[0]===cur);if(i<3)go(SEASONS[i+1][0]);else if(YEARS.includes(YEAR+1))location.href=yearUrl(YEAR+1,"winter")};
 window.addEventListener("hashchange",route);
 
 const ORD={"冬":0,"春":1,"夏":2,"秋":3};
@@ -226,7 +227,7 @@ $("bug").onclick=showBug;
 $("recs").onclick=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.style.overflow=""}try{history.replaceState(null,"","#recs")}catch(e){}renderRecs()};
 let RP=[],EDIT=false;
 function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new Set(P.songs.map(s=>nz(s)));picks={};
-  SEASONS.forEach(([k,name])=>(DATA[k+"2026"]||[]).forEach(m=>m.s.forEach(s=>{if(want.has(nz(s[1]))){const id=sid(s);if(!picks[id])picks[id]={q:(m.c||name),t:m.t,l:s[0],s:s[1],a:s[2],u:s[3]}}})));
+  SEASONS.forEach(([k,name])=>(DATA[k+YEAR]||[]).forEach(m=>m.s.forEach(s=>{if(want.has(nz(s[1]))){const id=sid(s);if(!picks[id])picks[id]={q:(m.c||name),t:m.t,l:s[0],s:s[1],a:s[2],u:s[3]}}})));
   EDIT=true;save();count();showCheck()}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
@@ -248,9 +249,9 @@ function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前�
     $("gsl").innerHTML=L.length?'<ol class="vt">'+L.map((x,i)=>(i===0||L[i-1].se!==x.se?`</ol><h3 class="vse">${esc(x.se)}</h3><ol class="vt">`:"")+`<li class="${x.v!==""?"on":""}">${gsT(x)}<select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(x.v)?" selected":""}>${n}</option>`).join("")}</select></li>`+(i===rkAt?'</ol>'+gsRank(L)+'<ol class="vt">':"")).join("")+'</ol>':'<p class="none">採点表にまだ曲がありません。</p>';
 }).catch(()=>{m.textContent="読み込めませんでした"})}
 let GSY=null;
-function gsYt(s){if(!GSY){GSY={};["winter","spring","summer","autumn"].forEach(k=>(DATA&&DATA[k+"2026"]||[]).forEach(m=>m.s.forEach(x=>{const n=nz(String(x[1]).replace(/【[^】]*】/g,""));if(n&&!GSY[n]&&x[3])GSY[n]=x[3]})))}
+function gsYt(s){if(!GSY){GSY={};["winter","spring","summer","autumn"].forEach(k=>(DATA&&DATA[k+YEAR]||[]).forEach(m=>m.s.forEach(x=>{const n=nz(String(x[1]).replace(/【[^】]*】/g,""));if(n&&!GSY[n]&&x[3])GSY[n]=x[3]})))}
   return GSY[nz(String(s).replace(/【[^】]*】/g,""))]||"https://www.youtube.com/results?search_query="+encodeURIComponent(s)}
-const gsT=x=>`<span class="rkt">${esc(x.s)}<span class="gsw"> | ${esc(x.w)} | </span><a class="gsy" href="${esc(gsYt(x.s))}" target="_blank" rel="noopener" title="YouTube">▶</a></span>`;
+const gsT=x=>`<span class="rkt">${esc(x.s)}<span class="gsw">${x.w?" | "+esc(x.w)+" | ":" "}</span><a class="gsy" href="${esc(gsYt(x.s))}" target="_blank" rel="noopener" title="YouTube">▶</a></span>`;
 function gsRank(L){const f=x=>x?(Math.round(+x*100)/100).toFixed(2):"-",row=(k,x)=>`<li><span class="rkn">${k}</span>${gsT(x)}<span class="rkc">平均 ${f(x.av)}・${x.n||0}人</span></li>`;
   const se=["冬","春","夏","秋"].map(s=>{const g=L.filter(x=>x.se===s&&x.b>0&&x.b<=3).sort((p,q)=>p.b-q.b);return g.length?`<h3 class="vse">${s} TOP3</h3><ol class="rk">`+g.map(x=>row(x.b,x)).join("")+'</ol>':""}).join("");
   const all=L.filter(x=>x.a>0&&x.a<=10).sort((p,q)=>p.a-q.a);
@@ -266,7 +267,7 @@ const RECS_CUTOFF=[2026,11,26,0,3,18];const RECS_EXCLUDE=[];
 function parseCSV(t){const R=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===','){row.push(f);f=""}else if(c==='\n'){row.push(f);R.push(row);row=[];f=""}else if(c!=='\r')f+=c}if(f||row.length){row.push(f);R.push(row)}return R}
 const tsk=s=>(String(s).match(/\d+/g)||[]).map(Number);
 const later=(a,b)=>{for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y)return x>y}return false};
-function seMap(){const M={};[["winter2026","冬"],["spring2026","春"],["summer2026","夏"],["autumn2026","秋"]].forEach(([k,se])=>(DATA&&DATA[k]||[]).forEach(e=>e.s.forEach(s=>{const n=nz(String(s[1]).replace(/【[^】]*】/g,""));if(n&&!(n in M))M[n]=se})));return M}
+function seMap(){const M={};[["winter","冬"],["spring","春"],["summer","夏"],["autumn","秋"]].forEach(([k,se])=>(DATA&&DATA[k+YEAR]||[]).forEach(e=>e.s.forEach(s=>{const n=nz(String(s[1]).replace(/【[^】]*】/g,""));if(n&&!(n in M))M[n]=se})));return M}
 const RECS_SHEET="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent("推薦一覧");
 function loadRecs(){return fetch(RECS_SHEET+"&_="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw 0;return r.text()}).then(t=>{
   const R=parseCSV(t);if(!R.length||R[0][0]!=="季節")throw 0;const ranking=[],by=new Map();let upd="";
@@ -287,7 +288,7 @@ function loadRecsCSV(){return fetch(RESP_CSV+"&_="+Date.now(),{cache:"no-store"}
   return {updated:`${now.getFullYear()}/${p2(now.getMonth()+1)}/${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())}（開いた時点の最新）`,ranking,posts:posts.reverse()}})}
 function renderRecs(){
   document.body.className="spring";
-  $("season").innerHTML="2026 <span>推薦曲</span>";
+  $("season").innerHTML=YEAR+" <span>推薦曲</span>";
   $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
   const SH="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/edit";
   $("main").innerHTML=`<p class="lead">みんなが「推薦する曲」として送った曲の一覧です。「✓ 確認」から送信すると、ここに追加されます（反映まで最大5分ほど。ページを開き直すと最新になります）。同じ名前で送り直すと前の推薦と置き換わります。自分の推薦を直すときは名前の横の「この推薦を修正」を押してください。</p><p class="lead" id="upd"></p>
@@ -310,7 +311,7 @@ const SEO=["冬","春","夏","秋","その他"];const bySe=(L,f)=>SEO.map(se=>{c
 const f2=x=>(Math.round(x*100)/100).toFixed(2);
 function renderVote(){
   document.body.className="summer";
-  $("season").innerHTML="2026 <span>採点</span>";
+  $("season").innerHTML=YEAR+" <span>採点</span>";
   $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
   $("main").innerHTML='<p class="lead">推薦された曲を0〜10点で採点するアンケートです。聴いた曲だけ点をつけてフォームで送ってください（同じ名前で送り直すと最新の内容に置き換わります）。集計は数分で下に反映されます。</p><div id="vf"></div><h2 class="sec">集計結果</h2><div id="vr"><p class="none">読み込み中…</p></div>';
   loadRecs().then(d=>{
@@ -333,7 +334,7 @@ document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.
 $("hist").onclick=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.style.overflow=""}if(location.hash!=="#history"){try{history.replaceState(null,"","#history")}catch(e){}}renderHistory()};
 function renderHistory(){
   document.body.className="winter";
-  $("season").innerHTML="2026 <span>対応一覧</span>";
+  $("season").innerHTML=YEAR+" <span>対応一覧</span>";
   $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
   $("main").innerHTML='<p class="lead">これまでに届いた報告と、その対応です。間違った対応は「この対応を取り消す」から取り消しを依頼できます（フォームが開くので、送信すると元に戻します）。新しい内容が出ないときはページ全体を再読み込みしてください。</p>'+nmHtml()+'<div class="hist" id="hl" style="margin-top:12px"><p class="none">読み込み中…</p></div>';
   sfetch("status").then(L=>{
