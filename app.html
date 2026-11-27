@@ -229,7 +229,7 @@ function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new
   EDIT=true;save();count();showCheck()}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
-const SCORE_CFG={"u": "", "k": ""};
+const SCORE_CFG={"u": "https://script.google.com/macros/s/AKfycbxfrIdcEu7pR4hvg-czVVNTZZ9n5J1CbzyNYTs6qzF3WV3Ep_VkXi0oweTzOYnVIvk/exec", "k": "fjitSu6jJMvrAqZp48kSstgq"};
 const GS_CSV="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent("採点");
 let GSV={};
 const gsName=()=>NAME.trim();
