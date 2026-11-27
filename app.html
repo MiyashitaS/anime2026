@@ -221,25 +221,27 @@ function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
 const SCORE_CFG={"u": "", "k": ""};
-let GSQ=Promise.resolve(),GSR=[];
-function gsCall(p){return new Promise((ok,ng)=>{const cb="gsc"+Date.now()+Math.floor(Math.random()*1e5),s=document.createElement("script");const cl=()=>{clearTimeout(t);delete window[cb];s.remove()};const t=setTimeout(()=>{cl();ng("時間切れです")},25000);window[cb]=d=>{cl();d&&d.ok?ok(d):ng(d&&d.err||"エラー")};s.onerror=()=>{cl();ng("通信エラー")};s.src=SCORE_CFG.u+"?"+new URLSearchParams(Object.assign({},p,{k:SCORE_CFG.k,callback:cb}));document.body.appendChild(s)})}
-function gsInit(R){GSR=R||[];const g=$("gs");if(!g)return;
+const GS_CSV="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent("採点");
+let GSV={};
+const gsName=()=>{const i=document.querySelector("#gs .nm");return i?i.value.trim():""};
+function gsInit(){const g=$("gs");if(!g)return;
   if(!SCORE_CFG.u){g.innerHTML='<p class="none">準備中です。今はスプレッドシートに直接入力してください。</p>';return}
-  g.innerHTML='<p class="lead">名前を入れて「読み込む」を押すと、推薦曲が並びます。点を選ぶとすぐスプレッドシートに保存されます（聴いた曲だけでOK）。</p>'+nmHtml()+'<button class="pbtn main" id="gsload" type="button">読み込む</button><span id="gsmsg" class="hst"></span><div id="gsl"></div>';
+  g.innerHTML='<p class="lead">採点表の曲を、表と同じ順番で採点できます。名前を入れて「読み込む」→点を選ぶ→「送信」。</p>'+nmHtml()+'<button class="pbtn main" id="gsload" type="button">読み込む</button><span id="gsmsg" class="hst"></span><div id="gsl"></div>';
   $("gsload").onclick=gsLoad}
-function gsName(){const i=document.querySelector("#gs .nm");return i?i.value.trim():""}
 function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
   NAME=nm;try{localStorage.setItem("anime2026_name",NAME)}catch(e){}
   m.textContent="読み込み中…";
-  gsCall({act:"get",name:nm}).then(d=>{m.textContent=nm+" さんの採点（"+Object.keys(d.sc).length+"曲採点済み）";
-    const se={};GSR.forEach(x=>se[nz(x.s)]=x.se);
-    const L=d.songs.map(s=>({s,se:se[nz(s)]||"その他"}));
-    $("gsl").innerHTML=L.length?bySe(L,g=>'<ol class="vt">'+g.map(x=>{const v=d.sc[x.s]??"";return`<li class="${v!==""?"on":""}"><span class="rkt">${esc(x.s)}</span><select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(v)?" selected":""}>${n}</option>`).join("")}</select><span class="gss"></span></li>`}).join("")+'</ol>'):'<p class="none">採点表にまだ曲がありません。</p>'
-  }).catch(e=>{m.textContent="読み込めませんでした："+e})}
-document.addEventListener("change",e=>{const s=e.target.dataset&&e.target.dataset.gs;if(s==null)return;const sel=e.target,li=sel.closest("li"),st=li.querySelector(".gss"),v=sel.value,nm=gsName();
-  if(!nm){st.textContent="名前を入れてください";return}
-  li.className=v!==""?"on":"";st.textContent="保存中…";
-  GSQ=GSQ.then(()=>gsCall({act:"score",name:nm,title:s,v}).then(()=>{st.textContent="✓ 保存"},err=>{st.textContent="× "+err}))});
+  fetch(GS_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{const R=parseCSV(t),c=(R[0]||[]).indexOf(nm,12);GSV={};
+    const L=R.slice(3).filter(r=>r[5]).map(r=>({se:r[2]||"その他",s:r[5],v:c>=12?(r[c]||""):""}));
+    L.forEach(x=>{if(x.v!=="")GSV[x.s]=x.v});
+    m.textContent=L.length+"曲"+(c>=12?"（前の採点を読み込みました）":"");
+    $("gsl").innerHTML=L.length?'<ol class="vt">'+L.map((x,i)=>(i===0||L[i-1].se!==x.se?`</ol><h3 class="vse">${esc(x.se)}</h3><ol class="vt">`:"")+`<li class="${x.v!==""?"on":""}"><span class="rkt">${esc(x.s)}</span><select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(x.v)?" selected":""}>${n}</option>`).join("")}</select></li>`).join("")+'</ol><div class="act"><button class="pbtn main" id="gssend" type="button">送信</button></div>':'<p class="none">採点表にまだ曲がありません。</p>';
+    if($("gssend"))$("gssend").onclick=gsSend}).catch(()=>{m.textContent="読み込めませんでした"})}
+function gsSend(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
+  const sc={};document.querySelectorAll("#gsl select").forEach(s=>sc[s.dataset.gs]=s.value);
+  m.textContent="送信中…";
+  fetch(SCORE_CFG.u,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({k:SCORE_CFG.k,name:nm,sc})}).then(()=>{m.textContent="送信しました（表に反映済みか確認するには「読み込む」）"}).catch(()=>{m.textContent="送信できませんでした"})}
+document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.gs!=null)e.target.closest("li").className=e.target.value!==""?"on":""});
 
 const RESP_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vRXFZuu4lGe7iqhkmpOWSYRMAlEjbRog90lhSlWL-8hg80dn9qrymdhnje5Ch8RdQp2kNk_U550zRB5/pub?gid=1862795633&single=true&output=csv";
 const RECS_CUTOFF=[2026,11,26,0,3,18];const RECS_EXCLUDE=[];
@@ -276,7 +278,7 @@ function renderRecs(){
   loadRecs().then(d=>{
     if(d.updated)$("upd").textContent="最終更新："+d.updated;
     $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map(x=>`<li><span class="rkn">${g.filter(y=>y.n>x.n).length+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.filter(y=>y.n>x.n).length+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
-    gsInit(d.ranking);
+    gsInit();
     RP=d.posts;$("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span>${p.name!=="匿名"?`<button class="pbtn edrec" type="button" data-nm="${esc(p.name)}">この推薦を修正</button>`:""}</div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
   }).catch(()=>{$("rk").innerHTML='<p class="none">まだ推薦はありません。</p>'});
   window.scrollTo(0,0);
