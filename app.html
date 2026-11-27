@@ -82,7 +82,7 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:18px;margin:20px 0 1
 .off{font-size:12px;font-weight:700;color:var(--sub);text-decoration:none;margin-left:auto;white-space:nowrap}.off:hover{color:var(--pick)}
 h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 .tbw{overflow-x:auto}.tb{border-collapse:collapse;font-size:13px;width:100%}.tb th,.tb td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}.tb td.t{white-space:normal;min-width:10em}.tb .n{text-align:right;font-variant-numeric:tabular-nums}
-.hitem p{margin:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}.hcan{font-size:13px;font-weight:700;color:var(--pick);margin-top:8px;display:inline-block}
+.hitem p{margin:2px 0;white-space:pre-wrap;overflow-wrap:anywhere}.edrec{margin-left:auto;font-size:12px;padding:2px 10px}.hcan{font-size:13px;font-weight:700;color:var(--pick);margin-top:8px;display:inline-block}
 @media (max-width:560px){.card{grid-template-columns:88px minmax(0,1fr);gap:12px}.art,.noart{width:88px}#season{font-size:17px}}
 @media (prefers-reduced-motion:no-preference){.song{transition:background .15s}}
 #gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}#gate form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;text-align:center;max-width:340px;width:100%}#gate h1{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 8px}#gate p{color:var(--sub);font-size:13px;margin:0 0 14px}#gate input{font:inherit;font-size:22px;letter-spacing:.3em;text-align:center;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:14px;background:var(--bg);color:var(--fg)}#gate .gm{color:var(--pick);margin:12px 0 0;min-height:1em}
@@ -164,21 +164,21 @@ const list=()=>Object.entries(picks).map(([id,v])=>({id,...v})).sort((a,b)=>((OR
 function open(){$("ov").hidden=false;document.body.style.overflow="hidden"}
 function close(){$("ov").hidden=true;document.body.style.overflow="";render()}
 function showCheck(confirmClear){
-  const L=list(), A=active();let h=`<h3>チェックした曲 ${A.length}曲</h3>`;
+  const L=list(), A=active();let h=`<h3>チェックした曲 ${A.length}曲</h3>`+(EDIT?`<p class="hint">「${esc(NAME)}」さんの推薦を読み込みました。チェックを付け外しして送信すると、前の推薦と置き換わります（全部外して送ると推薦の取り消し）。曲を足すときは各季節のページでチェックしてください。</p>`:"");
   h+=L.length?`<p class="hint">チェックを外した曲も一覧に残るので、もう一度チェックすれば元に戻せます。送信されるのはチェックが付いている曲だけです。</p><ul class="pk">${L.map(x=>`<li class="${x.off?"off":""}"><label><input type="checkbox" data-tg="${esc(x.id)}" ${x.off?"":"checked"}> ${esc(x.s)}</label></li>`).join("")}</ul>`:`<p class="none">まだチェックした曲はありません。各季節のページで曲にチェックを付けてください。</p>`;
-  h+=`<div class="act"><button class="pbtn main" id="send" type="button" ${A.length?"":"disabled"}>送信して一覧にする</button>`;
+  h+=`<div class="act"><button class="pbtn main" id="send" type="button" ${A.length||EDIT?"":"disabled"}>送信して一覧にする</button>`;
   h+=confirmClear?`<button class="pbtn" id="clr2" type="button">本当にすべて外す</button><button class="pbtn" id="back" type="button">やめる</button>`
                  :`<button class="pbtn" id="clr" type="button" ${A.length?"":"disabled"}>すべて外す</button>${L.length>A.length?'<button class="pbtn" id="purge" type="button">外した曲を一覧から消す</button>':""}<button class="pbtn" id="cls" type="button">閉じる</button>`;
   $("pn").innerHTML=h+"</div>";open();
 }
 function showSent(){
   const L=active(), txt=L.map(x=>x.s).join("\n");
-  let h=`<h3>推薦する曲の一覧 ${L.length}曲</h3><ol>`+L.map(x=>`<li>${esc(x.s)}</li>`).join("")+`</ol>`;
+  let h=(EDIT?`<p class="hint">名前を「${esc(NAME)}」のまま送ると前の推薦と置き換わります。</p>`:"")+(L.length?"":`<p class="none">0曲で送ると、この名前の推薦を取り消します。</p>`)+`<h3>推薦する曲の一覧 ${L.length}曲</h3><ol>`+L.map(x=>`<li>${esc(x.s)}</li>`).join("")+`</ol>`;
   h+=`<p style="margin:16px 0 6px;font-size:13px;color:var(--sub)">テキスト版（コピーして送れます）</p><textarea id="txt" readonly>${esc(txt)}</textarea>`;
   h+=nmHtml();h+=`<div class="act"><a class="pbtn main" href="${formUrl("【推薦する曲】\n"+txt)}" data-form="${esc("【推薦する曲】\n"+txt)}" target="_blank" rel="noopener">フォームで送る</a><button class="pbtn" id="copy" type="button">テキストをコピー</button><button class="pbtn" id="back" type="button">戻る</button><button class="pbtn" id="cls" type="button">閉じる</button><span class="msg" id="msg"></span></div>`;
   $("pn").innerHTML=h;open();
 }
-$("pn").addEventListener("change",e=>{const t=e.target;if(!t.dataset||!t.dataset.tg)return;const p=picks[t.dataset.tg];if(!p)return;p.off=!t.checked;t.closest("li").classList.toggle("off",!t.checked);save();count();const A=active();$("pn").querySelector("h3").textContent=`チェックした曲 ${A.length}曲`;$("send").disabled=!A.length});
+$("pn").addEventListener("change",e=>{const t=e.target;if(!t.dataset||!t.dataset.tg)return;const p=picks[t.dataset.tg];if(!p)return;p.off=!t.checked;t.closest("li").classList.toggle("off",!t.checked);save();count();const A=active();$("pn").querySelector("h3").textContent=`チェックした曲 ${A.length}曲`;$("send").disabled=!A.length&&!EDIT});
 $("pn").addEventListener("click",e=>{const t=e.target;
   if(t.dataset.rm){delete picks[t.dataset.rm];save();count();showCheck()}
   else if(t.id==="send")showSent();
@@ -214,6 +214,11 @@ function showBug(){
 }
 $("bug").onclick=showBug;
 $("recs").onclick=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.style.overflow=""}try{history.replaceState(null,"","#recs")}catch(e){}renderRecs()};
+let RP=[],EDIT=false;
+function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new Set(P.songs.map(s=>nz(s)));picks={};
+  SEASONS.forEach(([k,name])=>(DATA[k+"2026"]||[]).forEach(m=>m.s.forEach(s=>{if(want.has(nz(s[1]))){const id=sid(s);if(!picks[id])picks[id]={q:(m.c||name),t:m.t,l:s[0],s:s[1],a:s[2],u:s[3]}}})));
+  NAME=nm;try{localStorage.setItem("anime2026_name",NAME)}catch(e){}EDIT=true;save();count();showCheck()}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
 const RESP_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vRXFZuu4lGe7iqhkmpOWSYRMAlEjbRog90lhSlWL-8hg80dn9qrymdhnje5Ch8RdQp2kNk_U550zRB5/pub?gid=1862795633&single=true&output=csv";
 const RECS_CUTOFF=[2026,11,26,0,3,18];const RECS_EXCLUDE=[];
@@ -244,13 +249,13 @@ function renderRecs(){
   $("season").innerHTML="2026 <span>推薦曲</span>";
   $("prev").disabled=true;$("next").disabled=false;$("next").textContent="冬 ▶";
   const SH="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/edit";
-  $("main").innerHTML=`<p class="lead">みんなが「推薦する曲」として送った曲の一覧です。「✓ 確認」から送信すると、ここに追加されます（反映まで最大5分ほど。ページを開き直すと最新になります）。</p><p class="lead" id="upd"></p>
+  $("main").innerHTML=`<p class="lead">みんなが「推薦する曲」として送った曲の一覧です。「✓ 確認」から送信すると、ここに追加されます（反映まで最大5分ほど。ページを開き直すと最新になります）。同じ名前で送り直すと前の推薦と置き換わります。自分の推薦を直すときは名前の横の「この推薦を修正」を押してください。</p><p class="lead" id="upd"></p>
   <div class="act"><a class="pbtn main" href="${SH}" target="_blank" rel="noopener">採点表（スプレッドシート）を開く</a></div>
   <h2 class="sec">推薦の多い曲</h2><div id="rk"><p class="none">読み込み中…</p></div><h2 class="sec">みんなの推薦</h2><div class="hist" id="rp"></div>`;
   loadRecs().then(d=>{
     if(d.updated)$("upd").textContent="最終更新："+d.updated;
     $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map(x=>`<li><span class="rkn">${g.filter(y=>y.n>x.n).length+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.filter(y=>y.n>x.n).length+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
-    $("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span></div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
+    RP=d.posts;$("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span>${p.name!=="匿名"?`<button class="pbtn edrec" type="button" data-nm="${esc(p.name)}">この推薦を修正</button>`:""}</div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
   }).catch(()=>{$("rk").innerHTML='<p class="none">まだ推薦はありません。</p>'});
   window.scrollTo(0,0);
 }
