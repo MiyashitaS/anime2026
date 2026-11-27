@@ -78,7 +78,7 @@ a.pbtn{display:inline-block;text-decoration:none}
 .rk{list-style:none;padding:0;margin:0;display:grid;gap:6px}.rk li{display:flex;gap:10px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px}.rkn{font-weight:700;color:var(--acc);min-width:2.2em;font-variant-numeric:tabular-nums}.rkc{margin-left:auto;font-size:12px;color:var(--sub);white-space:nowrap}.rkt{min-width:0;overflow-wrap:anywhere}
 h2.sec{font-family:var(--display);font-weight:400;font-size:18px;margin:20px 0 10px}
 .hst.done{color:var(--s-summer)}.hst.doing{color:var(--s-autumn)}.hst.cancel{color:var(--sub);text-decoration:line-through}.hlab{font-size:12px;color:var(--sub);margin-top:6px}
-#nmgate{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.nmbox{background:#fff;color:#202124;border-radius:12px;padding:20px;max-width:360px;width:100%}.nmbox input{width:100%;font:inherit;padding:8px;margin:8px 0}.nmv{font-weight:700}.nmchg{margin-left:8px;padding:2px 10px}.gss{font-size:12px;color:#5f6368;min-width:4.5em}#gsmsg{margin-left:8px}#gs .nml{margin-right:8px}.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
+#nmgate{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.nmbox{background:#fff;color:#202124;border-radius:12px;padding:20px;max-width:360px;width:100%}.nmbox input{width:100%;font:inherit;padding:8px;margin:8px 0}.nmv{font-weight:700}.nml .nmchg{margin-left:8px;padding:2px 10px}#me .nmv{font-weight:700}.gss{font-size:12px;color:#5f6368;min-width:4.5em}#gsmsg{margin-left:8px}#gs .nml{margin-right:8px}.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
 .off{font-size:12px;font-weight:700;color:var(--sub);text-decoration:none;margin-left:auto;white-space:nowrap}.off:hover{color:var(--pick)}
 h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 .tbw{overflow-x:auto}.tb{border-collapse:collapse;font-size:13px;width:100%}.tb th,.tb td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}.tb td.t{white-space:normal;min-width:10em}.tb .n{text-align:right;font-variant-numeric:tabular-nums}
@@ -96,6 +96,7 @@ h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
   <button class="btn" id="bug" type="button">⚠ 不具合報告</button>
   <button class="btn" id="hist" type="button">📋 対応一覧</button>
   <button class="btn" id="recs" type="button">🎵 推薦曲</button>
+  <button class="btn nmchg" id="me" type="button" title="名前を変更">👤 <span class="nmv"></span></button>
   <input id="q" type="search" placeholder="作品名・曲名・アーティスト・声優で絞り込み">
 </div></div>
 <main id="main"><p class="lead">読み込み中…</p></main>
@@ -207,7 +208,7 @@ function askName(first){let g=$("nmgate");if(!g){g=document.createElement("div")
     NAME=v;try{localStorage.setItem("anime2026_name",NAME)}catch(x){}g.hidden=true;document.querySelectorAll(".nmv").forEach(s=>s.textContent=NAME);refreshForms();if(location.hash==="#recs")renderRecs()};
   $("nmok").onclick=ok;i.onkeydown=e=>{if(e.key==="Enter")ok()};if($("nmcx"))$("nmcx").onclick=()=>{g.hidden=true}}
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest(".nmchg"))askName(false)});
-if(!NAME.trim())setTimeout(()=>askName(true),0);
+document.querySelectorAll(".nmv").forEach(s=>s.textContent=NAME||"未設定");if(!NAME.trim())setTimeout(()=>askName(true),0);
 function showBug(){
   const name=SEASONS.find(x=>x[0]===cur)[1];
   let h=`<h3>不具合報告</h3><p class="hint">気づいたこと（曲の間違い・抜け、画像の誤りなど）を書いて「フォームを開いて送る」を押してください。開いたフォームで送信ボタンを押すと届きます。アカウントは不要です。</p>
