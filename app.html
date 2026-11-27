@@ -202,9 +202,9 @@ document.addEventListener("input",e=>{if(e.target.id==="bugtxt"||(e.target.class
 document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a[data-form]");if(!a)return;let t=a.dataset.form;if(a.id==="buglink")t+=$("bugtxt").value;a.href=formUrl(t)},true);
 const nmHtml=()=>`<div class="nml">名前：<span class="nmv">${esc(NAME)}</span><button class="pbtn nmchg" type="button">変更</button></div>`;
 function askName(first){let g=$("nmgate");if(!g){g=document.createElement("div");g.id="nmgate";document.body.appendChild(g)}
-  g.innerHTML=`<div class="nmbox"><h3>${first?"はじめに名前を入力してください":"名前を変更"}</h3><p class="hint">推薦・採点・報告はすべてこの名前で記録されます。いつも同じ名前を使ってください。</p><input id="nmin" type="text" maxlength="40" value="${esc(NAME)}" placeholder="名前"><div class="act"><button class="pbtn main" id="nmok" type="button">決定</button>${first?"":'<button class="pbtn" id="nmcx" type="button">やめる</button>'}</div><p id="nmerr" class="hint"></p></div>`;
+  g.innerHTML=`<div class="nmbox"><h3>${first?"ハンネを決めてください":"ハンネを変更"}</h3><p class="hint">推薦・採点・報告はすべてこのハンネで記録されます。いつも同じハンネを使ってください。</p><input id="nmin" type="text" maxlength="40" value="${esc(NAME)}" placeholder="ハンネ"><div class="act"><button class="pbtn main" id="nmok" type="button">決定</button>${first?"":'<button class="pbtn" id="nmcx" type="button">やめる</button>'}</div><p id="nmerr" class="hint"></p></div>`;
   g.hidden=false;const i=$("nmin");i.focus();
-  const ok=()=>{const v=i.value.trim();if(!v||v==="匿名"||v==="名前→"){$("nmerr").textContent="名前を入れてください";return}
+  const ok=()=>{const v=i.value.trim();if(!v||v==="匿名"||v==="名前→"){$("nmerr").textContent="ハンネを入れてください";return}
     NAME=v;try{localStorage.setItem("anime2026_name",NAME)}catch(x){}g.hidden=true;document.querySelectorAll(".nmv").forEach(s=>s.textContent=NAME);refreshForms();if(location.hash==="#recs")renderRecs()};
   $("nmok").onclick=ok;i.onkeydown=e=>{if(e.key==="Enter")ok()};if($("nmcx"))$("nmcx").onclick=()=>{g.hidden=true}}
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest(".nmchg"))askName(false)});
