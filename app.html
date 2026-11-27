@@ -240,11 +240,16 @@ function gsInit(){const g=$("gs");if(!g)return;
 function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
   m.textContent="読み込み中…";
   fetch(GS_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{const R=parseCSV(t),c=(R[0]||[]).indexOf(nm,12);GSV={};
-    const L=R.slice(3).filter(r=>r[5]).map(r=>({se:r[2]||"その他",s:r[5],v:c>=12?(r[c]||""):""}));
+    const L=R.slice(3).filter(r=>r[5]).map(r=>({se:r[2]||"その他",s:r[5],v:c>=12?(r[c]||""):"",a:+r[0]||0,b:+r[1]||0,av:r[7],n:r[9]}));
     L.forEach(x=>{if(x.v!=="")GSV[x.s]=x.v});
     const p2=x=>String(x).padStart(2,"0"),nw=new Date();m.textContent=L.length+"曲・スプレッドシートの内容（"+p2(nw.getHours())+":"+p2(nw.getMinutes())+" 時点）";GSD=false;
-    $("gsl").innerHTML=L.length?'<ol class="vt">'+L.map((x,i)=>(i===0||L[i-1].se!==x.se?`</ol><h3 class="vse">${esc(x.se)}</h3><ol class="vt">`:"")+`<li class="${x.v!==""?"on":""}"><span class="rkt">${esc(x.s)}</span><select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(x.v)?" selected":""}>${n}</option>`).join("")}</select></li>`).join("")+'</ol>':'<p class="none">採点表にまだ曲がありません。</p>';
+    const ai=L.map(x=>x.se).lastIndexOf("秋"),rkAt=ai>=0?ai:L.length-1;
+    $("gsl").innerHTML=L.length?'<ol class="vt">'+L.map((x,i)=>(i===0||L[i-1].se!==x.se?`</ol><h3 class="vse">${esc(x.se)}</h3><ol class="vt">`:"")+`<li class="${x.v!==""?"on":""}"><span class="rkt">${esc(x.s)}</span><select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(x.v)?" selected":""}>${n}</option>`).join("")}</select></li>`+(i===rkAt?'</ol>'+gsRank(L)+'<ol class="vt">':"")).join("")+'</ol>':'<p class="none">採点表にまだ曲がありません。</p>';
 }).catch(()=>{m.textContent="読み込めませんでした"})}
+function gsRank(L){const f=x=>x?(Math.round(+x*100)/100).toFixed(2):"-",row=(k,x)=>`<li><span class="rkn">${k}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">平均 ${f(x.av)}・${x.n||0}人</span></li>`;
+  const se=["冬","春","夏","秋"].map(s=>{const g=L.filter(x=>x.se===s&&x.b>0&&x.b<=3).sort((p,q)=>p.b-q.b);return g.length?`<h3 class="vse">${s} TOP3</h3><ol class="rk">`+g.map(x=>row(x.b,x)).join("")+'</ol>':""}).join("");
+  const all=L.filter(x=>x.a>0&&x.a<=10).sort((p,q)=>p.a-q.a);
+  return '<h2 class="sec">ランキング（採点表より）</h2>'+(se||all.length?se+(all.length?'<h3 class="vse">全体 TOP10</h3><ol class="rk">'+all.map(x=>row(x.a,x)).join("")+'</ol>':""):'<p class="none">まだ採点がありません。</p>')}
 let GSQ=Promise.resolve(),GSN=0;
 function gsPut(t,v){const m=$("gsmsg");GSN++;GSD=true;m.textContent="保存中…";
   GSQ=GSQ.then(()=>fetch(SCORE_CFG.u,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({k:SCORE_CFG.k,name:gsName(),sc:{[t]:v}})}).then(()=>true,()=>false)).then(ok=>{GSN--;if(!ok){m.textContent="保存できませんでした。通信を確認してください";return}if(!GSN){GSD=false;m.textContent="✓ 保存しました"}})}
