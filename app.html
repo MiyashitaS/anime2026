@@ -229,11 +229,11 @@ function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new
   EDIT=true;save();count();showCheck()}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
-const SCORE_CFG={"u": "https://script.google.com/macros/s/AKfycbxfrIdcEu7pR4hvg-czVVNTZZ9n5J1CbzyNYTs6qzF3WV3Ep_VkXi0oweTzOYnVIvk/exec", "k": "fjitSu6jJMvrAqZp48kSstgq"};
+const SCORE_CFG={u:"",k:""};
 const GS_CSV="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent("採点");
 let GSV={},GSD=false;
 const gsName=()=>NAME.trim();
-function gsInit(){const g=$("gs");if(!g)return;
+function gsInit(){const g=$("gs");if(!g)return;if(typeof DATA!=="undefined"&&DATA&&DATA._score)Object.assign(SCORE_CFG,DATA._score);
   if(!SCORE_CFG.u){g.innerHTML='<p class="none">準備中です。今はスプレッドシートに直接入力してください。</p>';return}
   g.innerHTML='<p class="lead">採点表の曲を、表と同じ順番で採点できます。点を選ぶとすぐにあなたの列に保存されます。</p><span id="gsmsg" class="hst"></span><div id="gsl"></div>';
   gsLoad()}
