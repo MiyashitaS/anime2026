@@ -78,7 +78,7 @@ a.pbtn{display:inline-block;text-decoration:none}
 .rk{list-style:none;padding:0;margin:0;display:grid;gap:6px}.rk li{display:flex;gap:10px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px}.rkn{font-weight:700;color:var(--acc);min-width:2.2em;font-variant-numeric:tabular-nums}.rkc{margin-left:auto;font-size:12px;color:var(--sub);white-space:nowrap}.rkt{min-width:0;overflow-wrap:anywhere}
 h2.sec{font-family:var(--display);font-weight:400;font-size:18px;margin:20px 0 10px}
 .hst.done{color:var(--s-summer)}.hst.doing{color:var(--s-autumn)}.hst.cancel{color:var(--sub);text-decoration:line-through}.hlab{font-size:12px;color:var(--sub);margin-top:6px}
-.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
+.gss{font-size:12px;color:#5f6368;min-width:4.5em}#gsmsg{margin-left:8px}#gs .nml{margin-right:8px}.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
 .off{font-size:12px;font-weight:700;color:var(--sub);text-decoration:none;margin-left:auto;white-space:nowrap}.off:hover{color:var(--pick)}
 h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 .tbw{overflow-x:auto}.tb{border-collapse:collapse;font-size:13px;width:100%}.tb th,.tb td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}.tb td.t{white-space:normal;min-width:10em}.tb .n{text-align:right;font-variant-numeric:tabular-nums}
@@ -220,6 +220,27 @@ function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new
   NAME=nm;try{localStorage.setItem("anime2026_name",NAME)}catch(e){}EDIT=true;save();count();showCheck()}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
+const SCORE_CFG={"u": "", "k": ""};
+let GSQ=Promise.resolve(),GSR=[];
+function gsCall(p){return new Promise((ok,ng)=>{const cb="gsc"+Date.now()+Math.floor(Math.random()*1e5),s=document.createElement("script");const cl=()=>{clearTimeout(t);delete window[cb];s.remove()};const t=setTimeout(()=>{cl();ng("時間切れです")},25000);window[cb]=d=>{cl();d&&d.ok?ok(d):ng(d&&d.err||"エラー")};s.onerror=()=>{cl();ng("通信エラー")};s.src=SCORE_CFG.u+"?"+new URLSearchParams(Object.assign({},p,{k:SCORE_CFG.k,callback:cb}));document.body.appendChild(s)})}
+function gsInit(R){GSR=R||[];const g=$("gs");if(!g)return;
+  if(!SCORE_CFG.u){g.innerHTML='<p class="none">準備中です。今はスプレッドシートに直接入力してください。</p>';return}
+  g.innerHTML='<p class="lead">名前を入れて「読み込む」を押すと、推薦曲が並びます。点を選ぶとすぐスプレッドシートに保存されます（聴いた曲だけでOK）。</p>'+nmHtml()+'<button class="pbtn main" id="gsload" type="button">読み込む</button><span id="gsmsg" class="hst"></span><div id="gsl"></div>';
+  $("gsload").onclick=gsLoad}
+function gsName(){const i=document.querySelector("#gs .nm");return i?i.value.trim():""}
+function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
+  NAME=nm;try{localStorage.setItem("anime2026_name",NAME)}catch(e){}
+  m.textContent="読み込み中…";
+  gsCall({act:"get",name:nm}).then(d=>{m.textContent=nm+" さんの採点（"+Object.keys(d.sc).length+"曲採点済み）";
+    const se={};GSR.forEach(x=>se[nz(x.s)]=x.se);
+    const L=d.songs.map(s=>({s,se:se[nz(s)]||"その他"}));
+    $("gsl").innerHTML=L.length?bySe(L,g=>'<ol class="vt">'+g.map(x=>{const v=d.sc[x.s]??"";return`<li class="${v!==""?"on":""}"><span class="rkt">${esc(x.s)}</span><select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(v)?" selected":""}>${n}</option>`).join("")}</select><span class="gss"></span></li>`}).join("")+'</ol>'):'<p class="none">採点表にまだ曲がありません。</p>'
+  }).catch(e=>{m.textContent="読み込めませんでした："+e})}
+document.addEventListener("change",e=>{const s=e.target.dataset&&e.target.dataset.gs;if(s==null)return;const sel=e.target,li=sel.closest("li"),st=li.querySelector(".gss"),v=sel.value,nm=gsName();
+  if(!nm){st.textContent="名前を入れてください";return}
+  li.className=v!==""?"on":"";st.textContent="保存中…";
+  GSQ=GSQ.then(()=>gsCall({act:"score",name:nm,title:s,v}).then(()=>{st.textContent="✓ 保存"},err=>{st.textContent="× "+err}))});
+
 const RESP_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vRXFZuu4lGe7iqhkmpOWSYRMAlEjbRog90lhSlWL-8hg80dn9qrymdhnje5Ch8RdQp2kNk_U550zRB5/pub?gid=1862795633&single=true&output=csv";
 const RECS_CUTOFF=[2026,11,26,0,3,18];const RECS_EXCLUDE=[];
 function parseCSV(t){const R=[];let row=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===','){row.push(f);f=""}else if(c==='\n'){row.push(f);R.push(row);row=[];f=""}else if(c!=='\r')f+=c}if(f||row.length){row.push(f);R.push(row)}return R}
@@ -251,10 +272,11 @@ function renderRecs(){
   const SH="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/edit";
   $("main").innerHTML=`<p class="lead">みんなが「推薦する曲」として送った曲の一覧です。「✓ 確認」から送信すると、ここに追加されます（反映まで最大5分ほど。ページを開き直すと最新になります）。同じ名前で送り直すと前の推薦と置き換わります。自分の推薦を直すときは名前の横の「この推薦を修正」を押してください。</p><p class="lead" id="upd"></p>
   <div class="act"><a class="pbtn main" href="${SH}" target="_blank" rel="noopener">採点表（スプレッドシート）を開く</a></div>
-  <h2 class="sec">推薦の多い曲</h2><div id="rk"><p class="none">読み込み中…</p></div><h2 class="sec">みんなの推薦</h2><div class="hist" id="rp"></div>`;
+  <h2 class="sec">サイトで採点</h2><div id="gs"></div><h2 class="sec">推薦の多い曲</h2><div id="rk"><p class="none">読み込み中…</p></div><h2 class="sec">みんなの推薦</h2><div class="hist" id="rp"></div>`;
   loadRecs().then(d=>{
     if(d.updated)$("upd").textContent="最終更新："+d.updated;
     $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map(x=>`<li><span class="rkn">${g.filter(y=>y.n>x.n).length+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.filter(y=>y.n>x.n).length+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
+    gsInit(d.ranking);
     RP=d.posts;$("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span>${p.name!=="匿名"?`<button class="pbtn edrec" type="button" data-nm="${esc(p.name)}">この推薦を修正</button>`:""}</div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
   }).catch(()=>{$("rk").innerHTML='<p class="none">まだ推薦はありません。</p>'});
   window.scrollTo(0,0);
