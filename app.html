@@ -78,7 +78,7 @@ a.pbtn{display:inline-block;text-decoration:none}
 .rk{list-style:none;padding:0;margin:0;display:grid;gap:6px}.rk li{display:flex;gap:10px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px}.rkn{font-weight:700;color:var(--acc);min-width:2.2em;font-variant-numeric:tabular-nums}.rkc{margin-left:auto;font-size:12px;color:var(--sub);white-space:nowrap}.rkt{min-width:0;overflow-wrap:anywhere}
 h2.sec{font-family:var(--display);font-weight:400;font-size:18px;margin:20px 0 10px}
 .hst.done{color:var(--s-summer)}.hst.doing{color:var(--s-autumn)}.hst.cancel{color:var(--sub);text-decoration:line-through}.hlab{font-size:12px;color:var(--sub);margin-top:6px}
-.gss{font-size:12px;color:#5f6368;min-width:4.5em}#gsmsg{margin-left:8px}#gs .nml{margin-right:8px}.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
+#nmgate{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.nmbox{background:#fff;color:#202124;border-radius:12px;padding:20px;max-width:360px;width:100%}.nmbox input{width:100%;font:inherit;padding:8px;margin:8px 0}.nmv{font-weight:700}.nmchg{margin-left:8px;padding:2px 10px}.gss{font-size:12px;color:#5f6368;min-width:4.5em}#gsmsg{margin-left:8px}#gs .nml{margin-right:8px}.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
 .off{font-size:12px;font-weight:700;color:var(--sub);text-decoration:none;margin-left:auto;white-space:nowrap}.off:hover{color:var(--pick)}
 h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 .tbw{overflow-x:auto}.tb{border-collapse:collapse;font-size:13px;width:100%}.tb th,.tb td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}.tb td.t{white-space:normal;min-width:10em}.tb .n{text-align:right;font-variant-numeric:tabular-nums}
@@ -199,7 +199,15 @@ const refreshForms=()=>document.querySelectorAll("a[data-form]").forEach(a=>{let
 document.addEventListener("input",e=>{if(e.target.id==="bugtxt"||(e.target.classList&&e.target.classList.contains("nm")))refreshForms()});
 ["pointerdown","touchstart","focusin"].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.closest&&e.target.closest("a[data-form]"))refreshForms()},true));
 document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a[data-form]");if(!a)return;let t=a.dataset.form;if(a.id==="buglink")t+=$("bugtxt").value;a.href=formUrl(t)},true);
-const nmHtml=()=>`<label class="nml">名前 <input class="nm" type="text" maxlength="40" value="${esc(NAME)}" placeholder="空欄なら匿名"></label>`;
+const nmHtml=()=>`<div class="nml">名前：<span class="nmv">${esc(NAME)}</span><button class="pbtn nmchg" type="button">変更</button></div>`;
+function askName(first){let g=$("nmgate");if(!g){g=document.createElement("div");g.id="nmgate";document.body.appendChild(g)}
+  g.innerHTML=`<div class="nmbox"><h3>${first?"はじめに名前を入力してください":"名前を変更"}</h3><p class="hint">推薦・採点・報告はすべてこの名前で記録されます。いつも同じ名前を使ってください。</p><input id="nmin" type="text" maxlength="40" value="${esc(NAME)}" placeholder="名前"><div class="act"><button class="pbtn main" id="nmok" type="button">決定</button>${first?"":'<button class="pbtn" id="nmcx" type="button">やめる</button>'}</div><p id="nmerr" class="hint"></p></div>`;
+  g.hidden=false;const i=$("nmin");i.focus();
+  const ok=()=>{const v=i.value.trim();if(!v||v==="匿名"||v==="名前→"){$("nmerr").textContent="名前を入れてください";return}
+    NAME=v;try{localStorage.setItem("anime2026_name",NAME)}catch(x){}g.hidden=true;document.querySelectorAll(".nmv").forEach(s=>s.textContent=NAME);refreshForms();if(location.hash==="#recs")renderRecs()};
+  $("nmok").onclick=ok;i.onkeydown=e=>{if(e.key==="Enter")ok()};if($("nmcx"))$("nmcx").onclick=()=>{g.hidden=true}}
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest(".nmchg"))askName(false)});
+if(!NAME.trim())setTimeout(()=>askName(true),0);
 function showBug(){
   const name=SEASONS.find(x=>x[0]===cur)[1];
   let h=`<h3>不具合報告</h3><p class="hint">気づいたこと（曲の間違い・抜け、画像の誤りなど）を書いて「フォームを開いて送る」を押してください。開いたフォームで送信ボタンを押すと届きます。アカウントは不要です。</p>
@@ -217,19 +225,18 @@ $("recs").onclick=()=>{if(!$("ov").hidden){$("ov").hidden=true;document.body.sty
 let RP=[],EDIT=false;
 function editRec(nm){const P=RP.find(x=>x.name===nm);if(!P)return;const want=new Set(P.songs.map(s=>nz(s)));picks={};
   SEASONS.forEach(([k,name])=>(DATA[k+"2026"]||[]).forEach(m=>m.s.forEach(s=>{if(want.has(nz(s[1]))){const id=sid(s);if(!picks[id])picks[id]={q:(m.c||name),t:m.t,l:s[0],s:s[1],a:s[2],u:s[3]}}})));
-  NAME=nm;try{localStorage.setItem("anime2026_name",NAME)}catch(e){}EDIT=true;save();count();showCheck()}
+  EDIT=true;save();count();showCheck()}
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".edrec");if(b)editRec(b.dataset.nm)});
 
 const SCORE_CFG={"u": "", "k": ""};
 const GS_CSV="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent("採点");
 let GSV={};
-const gsName=()=>{const i=document.querySelector("#gs .nm");return i?i.value.trim():""};
+const gsName=()=>NAME.trim();
 function gsInit(){const g=$("gs");if(!g)return;
   if(!SCORE_CFG.u){g.innerHTML='<p class="none">準備中です。今はスプレッドシートに直接入力してください。</p>';return}
-  g.innerHTML='<p class="lead">採点表の曲を、表と同じ順番で採点できます。名前を入れて「読み込む」→点を選ぶ→「送信」。</p>'+nmHtml()+'<button class="pbtn main" id="gsload" type="button">読み込む</button><span id="gsmsg" class="hst"></span><div id="gsl"></div>';
-  $("gsload").onclick=gsLoad}
+  g.innerHTML='<p class="lead">採点表の曲を、表と同じ順番で採点できます。点を選んで「送信」を押すと、あなたの列に書き込まれます。</p><span id="gsmsg" class="hst"></span><div id="gsl"></div>';
+  gsLoad()}
 function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
-  NAME=nm;try{localStorage.setItem("anime2026_name",NAME)}catch(e){}
   m.textContent="読み込み中…";
   fetch(GS_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{const R=parseCSV(t),c=(R[0]||[]).indexOf(nm,12);GSV={};
     const L=R.slice(3).filter(r=>r[5]).map(r=>({se:r[2]||"その他",s:r[5],v:c>=12?(r[c]||""):""}));
@@ -240,7 +247,7 @@ function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前�
 function gsSend(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
   const sc={};document.querySelectorAll("#gsl select").forEach(s=>sc[s.dataset.gs]=s.value);
   m.textContent="送信中…";
-  fetch(SCORE_CFG.u,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({k:SCORE_CFG.k,name:nm,sc})}).then(()=>{m.textContent="送信しました（表に反映済みか確認するには「読み込む」）"}).catch(()=>{m.textContent="送信できませんでした"})}
+  fetch(SCORE_CFG.u,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({k:SCORE_CFG.k,name:nm,sc})}).then(()=>{m.textContent="送信しました"}).catch(()=>{m.textContent="送信できませんでした"})}
 document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.gs!=null)e.target.closest("li").className=e.target.value!==""?"on":""});
 
 const RESP_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vRXFZuu4lGe7iqhkmpOWSYRMAlEjbRog90lhSlWL-8hg80dn9qrymdhnje5Ch8RdQp2kNk_U550zRB5/pub?gid=1862795633&single=true&output=csv";
@@ -279,7 +286,7 @@ function renderRecs(){
     if(d.updated)$("upd").textContent="最終更新："+d.updated;
     $("rk").innerHTML=d.ranking.length?bySe(d.ranking,g=>'<ol class="rk">'+g.map(x=>`<li><span class="rkn">${g.filter(y=>y.n>x.n).length+1}</span><span class="rkt">${esc(x.s)}</span><span class="rkc">${x.n}人・全体${d.ranking.filter(y=>y.n>x.n).length+1}位</span></li>`).join("")+'</ol>'):'<p class="none">まだ推薦はありません。</p>';
     gsInit();
-    RP=d.posts;$("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span>${p.name!=="匿名"?`<button class="pbtn edrec" type="button" data-nm="${esc(p.name)}">この推薦を修正</button>`:""}</div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
+    RP=d.posts;$("rp").innerHTML=d.posts.map(p=>`<article class="hitem"><div class="hhd"><span class="hno">${esc(p.name)}</span><span class="date">${esc(p.date)}</span><span class="hst">${p.songs.length}曲</span>${p.name===NAME?`<button class="pbtn edrec" type="button" data-nm="${esc(p.name)}">この推薦を修正</button>`:""}</div><p>${p.songs.map(esc).join("　/　")}</p></article>`).join("");
   }).catch(()=>{$("rk").innerHTML='<p class="none">まだ推薦はありません。</p>'});
   window.scrollTo(0,0);
 }
