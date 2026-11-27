@@ -231,7 +231,7 @@ document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest
 
 const SCORE_CFG={"u": "https://script.google.com/macros/s/AKfycbxfrIdcEu7pR4hvg-czVVNTZZ9n5J1CbzyNYTs6qzF3WV3Ep_VkXi0oweTzOYnVIvk/exec", "k": "fjitSu6jJMvrAqZp48kSstgq"};
 const GS_CSV="https://docs.google.com/spreadsheets/d/1RusP4cVut8MQb7BgGchESjuMcrM8G_0fmGorYyosMvA/gviz/tq?tqx=out:csv&headers=1&sheet="+encodeURIComponent("採点");
-let GSV={};
+let GSV={},GSD=false;
 const gsName=()=>NAME.trim();
 function gsInit(){const g=$("gs");if(!g)return;
   if(!SCORE_CFG.u){g.innerHTML='<p class="none">準備中です。今はスプレッドシートに直接入力してください。</p>';return}
@@ -242,14 +242,15 @@ function gsLoad(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前�
   fetch(GS_CSV+"&_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{const R=parseCSV(t),c=(R[0]||[]).indexOf(nm,12);GSV={};
     const L=R.slice(3).filter(r=>r[5]).map(r=>({se:r[2]||"その他",s:r[5],v:c>=12?(r[c]||""):""}));
     L.forEach(x=>{if(x.v!=="")GSV[x.s]=x.v});
-    m.textContent=L.length+"曲"+(c>=12?"（前の採点を読み込みました）":"");
+    const p2=x=>String(x).padStart(2,"0"),nw=new Date();m.textContent=L.length+"曲・スプレッドシートの内容（"+p2(nw.getHours())+":"+p2(nw.getMinutes())+" 時点）";GSD=false;
     $("gsl").innerHTML=L.length?'<ol class="vt">'+L.map((x,i)=>(i===0||L[i-1].se!==x.se?`</ol><h3 class="vse">${esc(x.se)}</h3><ol class="vt">`:"")+`<li class="${x.v!==""?"on":""}"><span class="rkt">${esc(x.s)}</span><select data-gs="${esc(x.s)}"><option value="">未採点</option>${[10,9,8,7,6,5,4,3,2,1,0].map(n=>`<option${String(n)===String(x.v)?" selected":""}>${n}</option>`).join("")}</select></li>`).join("")+'</ol><div class="act"><button class="pbtn main" id="gssend" type="button">送信</button></div>':'<p class="none">採点表にまだ曲がありません。</p>';
     if($("gssend"))$("gssend").onclick=gsSend}).catch(()=>{m.textContent="読み込めませんでした"})}
 function gsSend(){const nm=gsName(),m=$("gsmsg");if(!nm){m.textContent="名前を入れてください";return}
   const sc={};document.querySelectorAll("#gsl select").forEach(s=>sc[s.dataset.gs]=s.value);
   m.textContent="送信中…";
-  fetch(SCORE_CFG.u,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({k:SCORE_CFG.k,name:nm,sc})}).then(()=>{m.textContent="送信しました"}).catch(()=>{m.textContent="送信できませんでした"})}
-document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.gs!=null)e.target.closest("li").className=e.target.value!==""?"on":""});
+  fetch(SCORE_CFG.u,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({k:SCORE_CFG.k,name:nm,sc})}).then(()=>{GSD=false;m.textContent="送信しました"}).catch(()=>{m.textContent="送信できませんでした"})}
+document.addEventListener("change",e=>{if(e.target.dataset&&e.target.dataset.gs!=null){GSD=true;e.target.closest("li").className=e.target.value!==""?"on":""}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!GSD&&$("gsl")&&SCORE_CFG.u)gsLoad()});setInterval(()=>{if(!document.hidden&&!GSD&&$("gsl")&&SCORE_CFG.u)gsLoad()},60000);
 
 const RESP_CSV="https://docs.google.com/spreadsheets/d/e/2PACX-1vRXFZuu4lGe7iqhkmpOWSYRMAlEjbRog90lhSlWL-8hg80dn9qrymdhnje5Ch8RdQp2kNk_U550zRB5/pub?gid=1862795633&single=true&output=csv";
 const RECS_CUTOFF=[2026,11,26,0,3,18];const RECS_EXCLUDE=[];
