@@ -79,6 +79,7 @@ a.pbtn{display:inline-block;text-decoration:none}
 h2.sec{font-family:var(--display);font-weight:400;font-size:18px;margin:20px 0 10px}
 .hst.done{color:var(--s-summer)}.hst.doing{color:var(--s-autumn)}.hst.cancel{color:var(--sub);text-decoration:line-through}.hlab{font-size:12px;color:var(--sub);margin-top:6px}
 #nmgate{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}.nmbox{background:#fff;color:#202124;border-radius:12px;padding:20px;max-width:360px;width:100%}.nmbox input{width:100%;font:inherit;padding:8px;margin:8px 0}.nmv{font-weight:700}.nml .nmchg{margin-left:8px;padding:2px 10px}#me .nmv{font-weight:700}.gsw{color:var(--sub);font-size:12px}.gsy{display:inline-block;background:#f00;color:#fff;border-radius:5px;font-size:10px;line-height:1;padding:3px 6px;text-decoration:none;vertical-align:1px}.gss{font-size:12px;color:#5f6368;min-width:4.5em}#gsmsg{margin-left:8px}#gs .nml{margin-right:8px}.vt{list-style:none;padding:0;margin:0;display:grid;gap:6px}.vt li{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 12px}.vt select{font:inherit;margin-left:auto;padding:4px 6px;border-radius:6px}.vt .on{border-color:var(--pick)}
+#yearnav{max-width:980px;margin:40px auto 24px;padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;color:var(--sub);font-size:13px}#yearnav a{color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:4px 14px;text-decoration:none}#yearnav a:hover{color:var(--pick);border-color:var(--pick)}#yearnav b{color:var(--ink)}
 .off{font-size:12px;font-weight:700;color:var(--sub);text-decoration:none;margin-left:auto;white-space:nowrap}.off:hover{color:var(--pick)}
 h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
 .tbw{overflow-x:auto}.tb{border-collapse:collapse;font-size:13px;width:100%}.tb th,.tb td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}.tb td.t{white-space:normal;min-width:10em}.tb .n{text-align:right;font-variant-numeric:tabular-nums}
@@ -100,6 +101,7 @@ h3.vse{font-size:14px;margin:14px 0 6px;color:var(--acc)}
   <button class="btn nmchg" id="me" type="button" title="名前を変更">👤 <span class="nmv"></span></button>
 </div></div>
 <main id="main"><p class="lead">読み込み中…</p></main>
+<nav id="yearnav" aria-label="年の切り替え"></nav>
 <div id="ov" hidden><div id="pn" role="dialog" aria-modal="true"></div></div>
 
 <script>
@@ -116,6 +118,7 @@ const sfetch=n=>fetch(n+".bin",{cache:"no-store"}).then(r=>r.arrayBuffer()).then
 const SEASONS=[["winter","冬"],["spring","春"],["summer","夏"],["autumn","秋"]];
 const YEAR=2025,YEARS=[2024,2025,2026],ROOT=YEAR===2026?"./":"../";
 const yearUrl=(y,s)=>(YEAR===2026?"":"../")+(y===2026?"":y+"/")+"#"+s;
+document.addEventListener("DOMContentLoaded",()=>{const n=document.getElementById("yearnav");if(!n)return;n.innerHTML="ほかの年のページ："+YEARS.map(y=>y===YEAR?`<b>${y}年（表示中）</b>`:`<a href=\"${yearUrl(y,"winter")}\">${y}年</a>`).join("")});
 const KEY=YEAR===2026?"anime2026_picks":"anime"+YEAR+"_picks";
 let DATA=null, cur="winter", picks={}, VIEW=[];
 try{picks=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){picks={}}
@@ -132,8 +135,8 @@ function render(){
   const rows=qv?SEASONS.flatMap(([k,n])=>DATA[k+YEAR].map(m=>Object.assign({},m,{se:n}))):DATA[cur+YEAR];VIEW=rows;
   document.body.className=cur;
   $("season").innerHTML=`${YEAR} <span>${name}</span>`;
-  $("prev").disabled=i===0&&!YEARS.includes(YEAR-1); $("next").disabled=i===3&&!YEARS.includes(YEAR+1);
-  $("prev").textContent=i>0?`◀ ${SEASONS[i-1][1]}`:(YEARS.includes(YEAR-1)?`◀ ${YEAR-1}秋`:"◀ 前"); $("next").textContent=i<3?`${SEASONS[i+1][1]} ▶`:(YEARS.includes(YEAR+1)?`${YEAR+1}冬 ▶`:"次 ▶");
+  $("prev").disabled=i===0; $("next").disabled=i===3;
+  $("prev").textContent=i>0?`◀ ${SEASONS[i-1][1]}`:"◀ 前"; $("next").textContent=i<3?`${SEASONS[i+1][1]} ▶`:"次 ▶";
   let h=qv?`<p class="lead">「${esc(qv)}」を全シーズンから検索しています（<span id="hitn"></span>件）。</p>`:`<p class="lead">${name}アニメ ${rows.length}作品。気に入った曲にチェックを付けると、上の「確認」から一覧にできます。</p>`;
   rows.forEach((m,ri)=>{
     const art=m.i?`<img class="art" src="${m.i}" alt="${esc(m.t)}" loading="lazy">`:`<div class="noart">画像なし</div>`;
@@ -157,8 +160,8 @@ $("main").addEventListener("change",e=>{const c=e.target;if(c.type!=="checkbox")
   c.closest(".song").classList.toggle("on",c.checked); save(); count()});
 let qT;$("q").addEventListener("input",()=>{clearTimeout(qT);qT=setTimeout(()=>{if(["#history","#recs","#vote"].includes(location.hash)){try{history.replaceState(null,"","#"+cur)}catch(e){}}render()},250)});
 const go=h=>{try{history.replaceState(null,"","#"+h)}catch(e){location.hash=h}route()};
-$("prev").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash))return;const i=SEASONS.findIndex(s=>s[0]===cur);if(i>0)go(SEASONS[i-1][0]);else if(YEARS.includes(YEAR-1))location.href=yearUrl(YEAR-1,"autumn")};
-$("next").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash)){go("winter");return}const i=SEASONS.findIndex(s=>s[0]===cur);if(i<3)go(SEASONS[i+1][0]);else if(YEARS.includes(YEAR+1))location.href=yearUrl(YEAR+1,"winter")};
+$("prev").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash))return;const i=SEASONS.findIndex(s=>s[0]===cur);if(i>0)go(SEASONS[i-1][0])};
+$("next").onclick=()=>{if(["#history","#recs","#vote"].includes(location.hash)){go("winter");return}const i=SEASONS.findIndex(s=>s[0]===cur);if(i<3)go(SEASONS[i+1][0])};
 window.addEventListener("hashchange",route);
 
 const ORD={"冬":0,"春":1,"夏":2,"秋":3};
